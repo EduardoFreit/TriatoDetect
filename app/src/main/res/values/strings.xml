@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TriatoDetect</string>
+    <string name="login">Entrar</string>
+    <string name="logout">Sair</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="action_settings">Sair</string>
+</resources>

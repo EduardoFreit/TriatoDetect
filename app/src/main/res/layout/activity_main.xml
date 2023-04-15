@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/blue_500"
+    android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/image_view"
+            android:paddingTop="80dp"
+            android:paddingHorizontal="30dp"
+            android:layout_gravity="end"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:src="@drawable/logo"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:text="TriatoDetect"
+            android:layout_height="wrap_content"
+            android:textSize="50dp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:shadowRadius="2"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowColor="@color/black"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+                <Button
+                    android:id="@+id/loginButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/login"
+                    android:backgroundTint="@color/white"
+                    style="?attr/materialButtonOutlinedStyle"
+                    app:icon="@drawable/google_logo_32x32"
+                    />
+
+        </LinearLayout>
+
+
+
+</LinearLayout>
