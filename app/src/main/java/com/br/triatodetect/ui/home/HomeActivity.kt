@@ -34,6 +34,15 @@ class HomeActivity : BaseActivity() {
         binding.email.text = user?.email
         binding.nome.text = user?.name
         binding.logoutButton.setOnClickListener { super.signOut() }
+
+        val name: String = user?.name!!
+            .split(" ")[0]
+            .lowercase()
+            .replaceFirstChar {
+                it.uppercase()
+            }
+        val nameTitle: String = getString(R.string.welcome_title, name);
+        supportActionBar ?.title = nameTitle
     }
 
     override fun onBackPressed() {
