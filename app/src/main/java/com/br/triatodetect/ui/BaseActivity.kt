@@ -19,7 +19,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var auth: FirebaseAuth
-    protected var REQUEST_CAMERA_PERMISSION: Int = 0
     protected var FINE_LOCATION_REQUEST: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {

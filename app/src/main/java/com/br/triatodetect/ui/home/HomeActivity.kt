@@ -11,6 +11,7 @@ import com.br.triatodetect.R
 import com.br.triatodetect.databinding.ActivityHomeBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.BaseActivity
+import com.br.triatodetect.ui.camera.CameraActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import java.util.Objects
@@ -41,7 +42,7 @@ class HomeActivity : BaseActivity() {
         val nameTitle: String = getString(R.string.welcome_title, name);
         supportActionBar ?.title = nameTitle
 
-        binding.floatButtonCamera.setOnClickListener { this.permissionCamera() }
+        binding.floatButtonCamera.setOnClickListener { this.openCamera() }
     }
 
     override fun onBackPressed() {
@@ -57,15 +58,6 @@ class HomeActivity : BaseActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            REQUEST_CAMERA_PERMISSION -> {
-                // Se a permissão foi concedida, abra a câmera.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.openCamera()
-                } else {
-                    Toast.makeText(this, "A permissão para acessar a câmera foi negada.", Toast.LENGTH_SHORT).show()
-                }
-                return
-            }
             FINE_LOCATION_REQUEST -> {
                 // Se a permissão foi concedida, abra a câmera.
                 if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
@@ -83,17 +75,8 @@ class HomeActivity : BaseActivity() {
         }
     }
 
-    private fun permissionCamera() {
-        if (Utils.checkPermission(this, Manifest.permission.CAMERA)) {
-            // Se a permissão não tiver sido concedida, solicite-a ao usuário.
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
-        } else {
-            this.openCamera()
-        }
-    }
-
     private fun openCamera() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val intent = Intent(this, CameraActivity::class.java)
         startActivity(intent)
     }
 
