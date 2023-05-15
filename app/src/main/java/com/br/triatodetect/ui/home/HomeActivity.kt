@@ -42,7 +42,7 @@ class HomeActivity : BaseActivity() {
         val nameTitle: String = getString(R.string.welcome_title, name);
         supportActionBar ?.title = nameTitle
 
-        binding.floatButtonCamera.setOnClickListener { this.openCamera() }
+        binding.floatButtonCamera.setOnClickListener { this.openInstructionCamera() }
     }
 
     override fun onBackPressed() {
@@ -75,7 +75,7 @@ class HomeActivity : BaseActivity() {
         }
     }
 
-    private fun openCamera() {
+    private fun openInstructionCamera() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivity(intent)
     }

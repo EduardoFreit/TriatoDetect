@@ -1,6 +1,7 @@
 package com.br.triatodetect.ui.camera
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.br.triatodetect.databinding.ActivityCameraBinding
+import com.br.triatodetect.ui.home.HomeActivity
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -43,15 +45,20 @@ class CameraActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        viewBinding.imageCaptureButton.setOnClickListener { takePhoto() }
-        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
+        viewBinding.floatButtonCamera.setOnClickListener { takePhoto() }
+
+        viewBinding.floatCloseCamera.setOnClickListener { closeCamera() }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
     private fun takePhoto() {}
+    private fun closeCamera() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
+    }
 
-    private fun captureVideo() {}
+
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)

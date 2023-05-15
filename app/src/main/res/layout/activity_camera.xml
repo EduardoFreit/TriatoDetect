@@ -10,30 +10,35 @@
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        />
 
-    <Button
-        android:id="@+id/image_capture_button"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
-        android:layout_marginBottom="50dp"
-        android:layout_marginEnd="50dp"
-        android:elevation="2dp"
-        android:text="@string/take_photo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/vertical_centerline" />
+    <ImageView
+        android:id="@+id/float_close_camera"
+        android:layout_width="48dp"
+        android:layout_height="64dp"
+        android:layout_gravity="top"
+        android:elevation="5dp"
+        app:layout_constraintEnd_toEndOf="@id/vertical_endLine"
+        app:layout_constraintStart_toStartOf="@id/vertical_endLine"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_close_24"
+        app:tint="@color/white" />
 
-    <Button
-        android:id="@+id/video_capture_button"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
-        android:layout_marginBottom="50dp"
-        android:layout_marginStart="50dp"
-        android:elevation="2dp"
-        android:text="@string/start_capture"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/float_button_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="30dp"
+        app:srcCompat="@drawable/baseline_camera_alt_24"
+        app:tint="@color/white"
+        app:backgroundTint="@color/blue_500"
+        app:fabCustomSize="80dp"
+        app:maxImageSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/vertical_centerline" />
+        app:layout_constraintStart_toStartOf="@id/vertical_centerline"
+        app:layout_constraintEnd_toEndOf="@id/vertical_centerline" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_centerline"
@@ -41,5 +46,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent=".50" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical_endLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".90" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
