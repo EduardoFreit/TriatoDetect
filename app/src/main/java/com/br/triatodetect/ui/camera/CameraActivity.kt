@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
@@ -25,6 +26,7 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
+import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -35,7 +37,6 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var sessionManager: SessionManager
-    private lateinit var bitmap: Bitmap
     private var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,10 +75,11 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     imageProxy.image?.let { image: Image ->
+                        val bytes: ByteArray = Utils.imageToByteArray(image);
                         // Salvando Imagem CloudStore/Firestore(DB)
-                        Utils.saveImage(image, user)
+                        Utils.saveImage(bytes, user)
                         //Fazendo a classificação da imagem
-                        Utils.classify(applicationContext)
+                        Utils.classify(applicationContext, bytes)
                     }
                 }
             }
