@@ -1,17 +1,12 @@
 package com.br.triatodetect.ui.camera
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.icu.text.SimpleDateFormat
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,15 +25,6 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import com.google.android.gms.tasks.Task
-import com.google.firebase.ml.modeldownloader.CustomModel
-import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
-import com.google.firebase.ml.modeldownloader.DownloadType
-import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
-import org.tensorflow.lite.Interpreter
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -87,79 +73,12 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                    //Salvando Imagem CloudStore
                     imageProxy.image?.let { image: Image ->
-                        //Utils.saveImage(image, user)
-                        val buffer: ByteBuffer = image.planes[0].buffer
-                        val bytes = ByteArray(buffer.remaining())
-                        buffer.get(bytes)
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        //bitmap.copyPixelsFromBuffer(buffer)
-                        val conditions = CustomModelDownloadConditions.Builder()
-                            .requireWifi()
-                            .build()
-                        FirebaseModelDownloader.getInstance()
-                            .getModel("triatodetect", DownloadType.LOCAL_MODEL, conditions)
-                            .addOnCompleteListener { model: Task<CustomModel> ->
-                                // Download complete. Depending on your app, you could enable the ML
-                                // feature, or switch from the local model to the remote model, etc.val modelFile = model?.file
-                                val modelFile = model.result.file
-                                var interpreter: Interpreter? = null;
-                                if (modelFile != null) {
-                                    interpreter = Interpreter(modelFile)
-                                }
-                                // val imageBitmap: Bitmap? = imageProxyToBitmap(imageProxy, image)
-                                //Estou perdendo a referencia do Bitmap
-                                val bitmap = Bitmap.createScaledBitmap(bitmap, 640, 640, true)
-                                val input = ByteBuffer.allocateDirect(640*640*3*4).order(ByteOrder.nativeOrder())
-                                for (y in 0 until 640) {
-                                    for (x in 0 until 640) {
-                                        val px = bitmap.getPixel(x, y)
-
-                                        // Get channel values from the pixel value.
-                                        val r = Color.red(px)
-                                        val g = Color.green(px)
-                                        val b = Color.blue(px)
-
-                                        // Normalize channel values to [-1.0, 1.0]. This requirement depends on the model.
-                                        // For example, some models might require values to be normalized to the range
-                                        // [0.0, 1.0] instead.
-                                        val rf = (r - 127) / 255f
-                                        val gf = (g - 127) / 255f
-                                        val bf = (b - 127) / 255f
-
-                                        input.putFloat(rf)
-                                        input.putFloat(gf)
-                                        input.putFloat(bf)
-                                    }
-                                }
-
-                                val bufferSize = 5 * java.lang.Float.SIZE / java.lang.Byte.SIZE
-                                val modelOutput = ByteBuffer.allocateDirect(bufferSize).order(ByteOrder.nativeOrder())
-
-                                interpreter?.run(input, modelOutput)
-
-                                modelOutput.rewind()
-                                val probabilities = modelOutput.asFloatBuffer()
-                                try {
-                                    for (i in 0 until probabilities.capacity()) {
-                                        val probability = probabilities.get(i)
-                                        println("$probability")
-                                    }
-                                } catch (e: java.lang.Exception) {
-                                    // File not found?
-                                }
-
-                            }
-                            .addOnFailureListener {
-                                println(it.message)
-                            }
-
-
-
-                        Utils.classify(imageProxy, image, bytes)
+                        // Salvando Imagem CloudStore/Firestore(DB)
+                        Utils.saveImage(image, user)
+                        //Fazendo a classificação da imagem
+                        Utils.classify(applicationContext)
                     }
-                    //Fazendo a classificação da imagem
                 }
             }
         )
@@ -167,12 +86,6 @@ class CameraActivity : AppCompatActivity() {
     private fun closeCamera() {
         val intent = Intent(this, HomeActivity::class.java)
         startActivity(intent)
-    }
-
-    private fun saveRegisterImageDB(imageName: String) {
-        val rowImage = Imagem(imageName, user?.email);
-
-        Utils.insertNewObject(rowImage, "Images")
     }
 
     private fun startCamera() {
