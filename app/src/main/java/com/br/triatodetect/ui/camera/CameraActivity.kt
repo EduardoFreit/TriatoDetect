@@ -4,6 +4,9 @@ import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.media.Image
 import android.os.Build
@@ -27,13 +30,18 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import java.io.File
-import java.io.IOException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.ml.modeldownloader.CustomModel
+import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
+import com.google.firebase.ml.modeldownloader.DownloadType
+import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
+import org.tensorflow.lite.Interpreter
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-typealias LumaListener = (luma: Double) -> Unit
 
 class CameraActivity : AppCompatActivity() {
 
@@ -41,6 +49,7 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var sessionManager: SessionManager
+    private lateinit var bitmap: Bitmap
     private var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,23 +77,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-
-        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-            .format(System.currentTimeMillis())
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
-            }
-        }
-
-        val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(contentResolver,
-                MediaStore.Images.Media.INTERNAL_CONTENT_URI,
-                contentValues)
-            .build()
+        val imageCapture = imageCapture
 
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(this),
@@ -94,15 +87,79 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                    var image: Image? = imageProxy.image
-                    val currentTime: String = System.currentTimeMillis().toString()
-                    val imageName = "${currentTime}${IMAGE_EXTENSION}"
+                    //Salvando Imagem CloudStore
+                    imageProxy.image?.let { image: Image ->
+                        //Utils.saveImage(image, user)
+                        val buffer: ByteBuffer = image.planes[0].buffer
+                        val bytes = ByteArray(buffer.remaining())
+                        buffer.get(bytes)
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        //bitmap.copyPixelsFromBuffer(buffer)
+                        val conditions = CustomModelDownloadConditions.Builder()
+                            .requireWifi()
+                            .build()
+                        FirebaseModelDownloader.getInstance()
+                            .getModel("triatodetect", DownloadType.LOCAL_MODEL, conditions)
+                            .addOnCompleteListener { model: Task<CustomModel> ->
+                                // Download complete. Depending on your app, you could enable the ML
+                                // feature, or switch from the local model to the remote model, etc.val modelFile = model?.file
+                                val modelFile = model.result.file
+                                var interpreter: Interpreter? = null;
+                                if (modelFile != null) {
+                                    interpreter = Interpreter(modelFile)
+                                }
+                                // val imageBitmap: Bitmap? = imageProxyToBitmap(imageProxy, image)
+                                //Estou perdendo a referencia do Bitmap
+                                val bitmap = Bitmap.createScaledBitmap(bitmap, 640, 640, true)
+                                val input = ByteBuffer.allocateDirect(640*640*3*4).order(ByteOrder.nativeOrder())
+                                for (y in 0 until 640) {
+                                    for (x in 0 until 640) {
+                                        val px = bitmap.getPixel(x, y)
 
-                    user?.email?.let {email: String ->
-                        image?.let { image: Image ->
-                            Utils.saveImage(email, imageName, image)
-                        }
+                                        // Get channel values from the pixel value.
+                                        val r = Color.red(px)
+                                        val g = Color.green(px)
+                                        val b = Color.blue(px)
+
+                                        // Normalize channel values to [-1.0, 1.0]. This requirement depends on the model.
+                                        // For example, some models might require values to be normalized to the range
+                                        // [0.0, 1.0] instead.
+                                        val rf = (r - 127) / 255f
+                                        val gf = (g - 127) / 255f
+                                        val bf = (b - 127) / 255f
+
+                                        input.putFloat(rf)
+                                        input.putFloat(gf)
+                                        input.putFloat(bf)
+                                    }
+                                }
+
+                                val bufferSize = 5 * java.lang.Float.SIZE / java.lang.Byte.SIZE
+                                val modelOutput = ByteBuffer.allocateDirect(bufferSize).order(ByteOrder.nativeOrder())
+
+                                interpreter?.run(input, modelOutput)
+
+                                modelOutput.rewind()
+                                val probabilities = modelOutput.asFloatBuffer()
+                                try {
+                                    for (i in 0 until probabilities.capacity()) {
+                                        val probability = probabilities.get(i)
+                                        println("$probability")
+                                    }
+                                } catch (e: java.lang.Exception) {
+                                    // File not found?
+                                }
+
+                            }
+                            .addOnFailureListener {
+                                println(it.message)
+                            }
+
+
+
+                        Utils.classify(imageProxy, image, bytes)
                     }
+                    //Fazendo a classificação da imagem
                 }
             }
         )

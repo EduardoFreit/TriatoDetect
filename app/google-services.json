@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1045019851244:android:fabd23116d4eb954fc28c9",
+        "mobilesdk_app_id": "1:1045019851244:android:d564b1aa307995a1fc28c9",
         "android_client_info": {
           "package_name": "com.br.triatodetect"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "1045019851244-3gras1f9lcjh1rmei046fie2ua4f7qmq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.br.triatodetect",
-            "certificate_hash": "3dcb5ad4e99fea755b6b66021eafc1f0a8b2dff7"
-          }
-        },
         {
           "client_id": "1045019851244-9vld9f935i2kp5gnks1g0ic22fjdftu1.apps.googleusercontent.com",
           "client_type": 3
