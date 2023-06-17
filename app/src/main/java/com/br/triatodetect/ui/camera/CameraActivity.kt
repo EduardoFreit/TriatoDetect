@@ -3,8 +3,6 @@ package com.br.triatodetect.ui.camera
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
@@ -21,19 +19,17 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.br.triatodetect.databinding.ActivityCameraBinding
-import com.br.triatodetect.models.Imagem
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
 class CameraActivity : AppCompatActivity() {
 
-    private lateinit var viewBinding: ActivityCameraBinding
+    private lateinit var binding: ActivityCameraBinding
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var sessionManager: SessionManager
@@ -41,13 +37,14 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinding = ActivityCameraBinding.inflate(layoutInflater)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
 
         sessionManager = SessionManager.getInstance(applicationContext)
         this.user = sessionManager.getUserData()
 
         supportActionBar?.hide()
-        setContentView(viewBinding.root)
+        setContentView(binding.root)
+
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -56,9 +53,9 @@ class CameraActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        viewBinding.floatButtonCamera.setOnClickListener { takePhoto() }
+        binding.floatButtonCamera.setOnClickListener { takePhoto() }
 
-        viewBinding.floatCloseCamera.setOnClickListener { closeCamera() }
+        binding.floatCloseCamera.setOnClickListener { closeCamera() }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -75,11 +72,14 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     imageProxy.image?.let { image: Image ->
-                        val bytes: ByteArray = Utils.imageToByteArray(image);
+                        Utils.setImageByteArray(image, imageProxy.imageInfo.rotationDegrees);
                         // Salvando Imagem CloudStore/Firestore(DB)
-                        Utils.saveImage(bytes, user)
+                        //Utils.saveImage(bytes, user)
                         //Fazendo a classificação da imagem
-                        Utils.classify(applicationContext, bytes)
+                        //Utils.classify(applicationContext, bytes)
+                        val intent = Intent(this@CameraActivity, ConfirmImageActivity::class.java)
+                        //intent.putExtra("image", bytes)
+                        startActivity(intent)
                     }
                 }
             }
@@ -97,7 +97,7 @@ class CameraActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder().build()

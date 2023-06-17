@@ -27,15 +27,24 @@
         android:theme="@style/Theme.TriatoDetect"
         tools:targetApi="31">
         <activity
+            android:name=".ui.classify.ClassifyActivity"
+            android:exported="false"
+            android:label="@string/title_activity_classify"
+            android:theme="@style/Theme.TriatoDetect" />
+        <activity
+            android:name=".ui.camera.ConfirmImageActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.camera.InstructionCameraActivity"
             android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.home.HomeActivity"/>
+                android:value=".ui.home.HomeActivity" />
         </activity>
         <activity
             android:name=".ui.camera.CameraActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="false" />

@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.Image
 import android.os.SystemClock
 import android.util.Log
-import androidx.camera.core.ImageProxy
 import androidx.core.content.ContextCompat
 import com.br.triatodetect.models.Imagem
 import com.br.triatodetect.models.User
@@ -35,12 +35,14 @@ object Utils {
     private const val pathModel: String = "model/model_detection_triatominies_float32.tflite"
     private const val IMAGE_EXTENSION = ".jpg"
     private var imageClassifier: ImageClassifier? = null
+    private var imageByteArray: ByteArray? = null
+    var result: MutableList<String> = ArrayList()
 
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
     }
 
-    fun insertNewObject(obj: Any, collection: String) {
+    private fun insertNewObject(obj: Any, collection: String) {
         storage.reference
         db.collection(collection)
             .add(obj)
@@ -59,14 +61,43 @@ object Utils {
         return outputStream.toByteArray()
     }
 
-    fun imageToByteArray(image: Image): ByteArray {
+    private fun rotateByteArrayImage(imageData: ByteArray, degrees: Int): ByteArray {
+        // Convert ByteArray to Bitmap
+        val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+
+        // Perform rotation on the Bitmap
+        val matrix = Matrix()
+        matrix.postRotate(degrees.toFloat())
+        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+        // Convert Bitmap to ByteArray
+        val outputStream = ByteArrayOutputStream()
+        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+
+        return outputStream.toByteArray()
+    }
+
+    private fun imageToByteArray(image: Image, degrees: Int): ByteArray {
         val buffer: ByteBuffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return compressImage(bytes, 25)
+        return rotateByteArrayImage(bytes, degrees)
     }
 
-    fun saveImage(image: ByteArray, user: User?) {
+    fun setImageByteArray(image: Image, degrees: Int) {
+        imageByteArray = imageToByteArray(image, degrees)
+    }
+
+    fun getImageByteArray(): ByteArray? {
+       return imageByteArray
+    }
+
+    fun resetImageByteArray() {
+        imageByteArray = null
+    }
+
+    fun saveImageStores(image: ByteArray, user: User?) {
+        val imageComp = this.compressImage(image, 30)
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
         //Salvando imagem no CloudStore
@@ -75,7 +106,7 @@ object Utils {
             val insectImagesRef:StorageReference = storageRef
                 .child("Images/${email}/${imageName}")
 
-            var uploadTask: UploadTask = insectImagesRef.putBytes(image)
+            var uploadTask: UploadTask = insectImagesRef.putBytes(imageComp)
             uploadTask.addOnFailureListener {e ->
                 Log.e("Insert", "Error adding image", e)
             }.addOnSuccessListener { taskSnapshot ->
@@ -108,6 +139,7 @@ object Utils {
 
 
     fun classify(context: Context, bytes: ByteArray) {
+        result.clear()
         if (imageClassifier == null) {
             setupImageClassifier(context)
         }
@@ -123,11 +155,15 @@ object Utils {
 
         val imageProcessingOptions = ImageProcessingOptions.builder().build()
 
-        val results = imageClassifier?.classify(tensorImage, imageProcessingOptions)
+        val classifications = imageClassifier?.classify(tensorImage, imageProcessingOptions)
+
+        if(!classifications.isNullOrEmpty()) {
+            result.add(classifications[0].categories[0].label)
+            result.add(classifications[0].categories[0].score.toString())
+        }
 
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
 
-        println("oi")
     }
 
 

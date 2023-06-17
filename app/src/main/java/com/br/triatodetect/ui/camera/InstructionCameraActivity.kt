@@ -6,18 +6,18 @@ import android.os.Bundle
 import com.br.triatodetect.databinding.ActivityInstructionCameraBinding
 
 class InstructionCameraActivity : AppCompatActivity() {
-    private lateinit var viewBinding: ActivityInstructionCameraBinding
+    private lateinit var binding: ActivityInstructionCameraBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinding = ActivityInstructionCameraBinding.inflate(layoutInflater)
+        binding = ActivityInstructionCameraBinding.inflate(layoutInflater)
 
-        viewBinding.instructionButton.setOnClickListener {
+        binding.instructionButton.setOnClickListener {
             this.openCamera()
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        setContentView(viewBinding.root)
+        setContentView(binding.root)
     }
 
     private fun openCamera() {
