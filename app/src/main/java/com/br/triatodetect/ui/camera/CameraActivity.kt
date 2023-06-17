@@ -1,11 +1,8 @@
 package com.br.triatodetect.ui.camera
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationListener
-import android.location.LocationManager
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
@@ -26,7 +23,6 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import com.google.android.gms.location.FusedLocationProviderClient
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -77,12 +73,7 @@ class CameraActivity : AppCompatActivity() {
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     imageProxy.image?.let { image: Image ->
                         Utils.setImageByteArray(image, imageProxy.imageInfo.rotationDegrees);
-                        // Salvando Imagem CloudStore/Firestore(DB)
-                        //Utils.saveImage(bytes, user)
-                        //Fazendo a classificação da imagem
-                        //Utils.classify(applicationContext, bytes)
                         val intent = Intent(this@CameraActivity, ConfirmImageActivity::class.java)
-                        //intent.putExtra("image", bytes)
                         startActivity(intent)
                     }
                 }

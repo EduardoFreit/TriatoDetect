@@ -5,11 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.br.triatodetect.databinding.ActivityCameraBinding
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.classify.ClassifyActivity
-import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
