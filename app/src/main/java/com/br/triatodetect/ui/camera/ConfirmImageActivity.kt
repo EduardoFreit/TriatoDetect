@@ -12,16 +12,20 @@ import com.br.triatodetect.ui.classify.ClassifyActivity
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 class ConfirmImageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityConfirmImageBinding
     private lateinit var sessionManager: SessionManager
     private var user: User? = null
     private var image: ByteArray? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConfirmImageBinding.inflate(layoutInflater)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         sessionManager = SessionManager.getInstance(applicationContext)
         this.user = sessionManager.getUserData()
@@ -42,7 +46,7 @@ class ConfirmImageActivity : AppCompatActivity() {
 
     private fun processImage() {
         image?.let {
-            Utils.saveImageStores(it, user)
+            Utils.saveImageStores(it, user, this)
             Utils.classify(this, it)
             val intent = Intent(this@ConfirmImageActivity, ClassifyActivity::class.java)
             startActivity(intent)

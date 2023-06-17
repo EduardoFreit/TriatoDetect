@@ -1,16 +1,21 @@
 package com.br.triatodetect.utils
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.location.Location
 import android.media.Image
 import android.os.SystemClock
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.br.triatodetect.models.Imagem
 import com.br.triatodetect.models.User
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
@@ -37,6 +42,7 @@ object Utils {
     private var imageClassifier: ImageClassifier? = null
     private var imageByteArray: ByteArray? = null
     var result: MutableList<String> = ArrayList()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
@@ -96,11 +102,13 @@ object Utils {
         imageByteArray = null
     }
 
-    fun saveImageStores(image: ByteArray, user: User?) {
+
+    fun saveImageStores(image: ByteArray, user: User?, context: Context) {
         val imageComp = this.compressImage(image, 30)
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
-        //Salvando imagem no CloudStore
+
+        //salvando imagem no Firestore(DB)
         user?.email?.let {email: String ->
             storageRef = storage.reference
             val insectImagesRef:StorageReference = storageRef
@@ -114,9 +122,25 @@ object Utils {
                 Log.d("Insert", "Image added with referece: ${taskSnapshot.metadata?.reference}")
             }
         }
-        //salvando imagem no Firestore(DB)
-        val rowImage = Imagem(imageName, user?.email);
-        this.insertNewObject(rowImage, "Images")
+
+        //Salvando imagem no CloudStore
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        if (!(ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+                    )) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location : Location? ->
+                    if(location != null) {
+                        val rowImage = Imagem(imageName, user?.email, location.latitude, location.longitude);
+                        this.insertNewObject(rowImage, "Images")
+                    }
+                }
+        }
     }
     private fun setupImageClassifier(context: Context) {
         val optionsBuilder = ImageClassifier.ImageClassifierOptions.builder()
@@ -165,6 +189,7 @@ object Utils {
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
 
     }
+
 
 
 }
