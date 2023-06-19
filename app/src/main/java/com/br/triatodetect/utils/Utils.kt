@@ -13,6 +13,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.br.triatodetect.models.Imagem
+import com.br.triatodetect.models.StatusImagem
 import com.br.triatodetect.models.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -103,7 +104,7 @@ object Utils {
     }
 
 
-    fun saveImageStores(image: ByteArray, user: User?, context: Context) {
+    private fun saveImageStores(image: ByteArray, user: User?, context: Context) {
         val imageComp = this.compressImage(image, 30)
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
@@ -136,7 +137,13 @@ object Utils {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location : Location? ->
                     if(location != null) {
-                        val rowImage = Imagem(imageName, user?.email, location.latitude, location.longitude);
+                        val rowImage = Imagem(
+                            imageName, user?.email,
+                            location.latitude, location.longitude,
+                            StatusImagem.AGUARDANDO_CONFIRMACAO,
+                            result[0],
+                            result[1]
+                        );
                         this.insertNewObject(rowImage, "Images")
                     }
                 }
@@ -162,14 +169,14 @@ object Utils {
     }
 
 
-    fun classify(context: Context, bytes: ByteArray) {
+    fun classify(context: Context, bytes: ByteArray, user:User?) {
         result.clear()
         if (imageClassifier == null) {
             setupImageClassifier(context)
         }
         val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
-        var inferenceTime = SystemClock.uptimeMillis()
+        //var inferenceTime = SystemClock.uptimeMillis()
 
         val imageProcessor =
             ImageProcessor.Builder()
@@ -184,9 +191,9 @@ object Utils {
         if(!classifications.isNullOrEmpty()) {
             result.add(classifications[0].categories[0].label)
             result.add(classifications[0].categories[0].score.toString())
+            this.saveImageStores(bytes, user, context)
         }
-
-        inferenceTime = SystemClock.uptimeMillis() - inferenceTime
+        //inferenceTime = SystemClock.uptimeMillis() - inferenceTime
 
     }
 

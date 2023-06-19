@@ -44,8 +44,8 @@ class ConfirmImageActivity : AppCompatActivity() {
 
     private fun processImage() {
         image?.let {
-            Utils.saveImageStores(it, user, this)
-            Utils.classify(this, it)
+//            Utils.saveImageStores(it, user, this)
+            Utils.classify(this, it, user)
             val intent = Intent(this@ConfirmImageActivity, ClassifyActivity::class.java)
             startActivity(intent)
             finish()
