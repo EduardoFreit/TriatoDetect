@@ -1,6 +1,6 @@
 package com.br.triatodetect.models
 
-enum class StatusImagem {
+enum class StatusImage {
     PENDENTE,
     AGUARDANDO_CONFIRMACAO,
     FINALIZADO;

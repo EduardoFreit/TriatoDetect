@@ -30,13 +30,16 @@
             android:name=".ui.classify.ClassifyActivity"
             android:exported="false"
             android:label="@string/title_activity_classify"
-            android:theme="@style/Theme.TriatoDetect" />
+            android:theme="@style/Theme.TriatoDetect"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.camera.ConfirmImageActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.camera.InstructionCameraActivity"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.home.HomeActivity" />
@@ -47,10 +50,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

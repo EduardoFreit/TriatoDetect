@@ -3,8 +3,10 @@ package com.br.triatodetect.ui.camera
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Surface
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.classify.ClassifyActivity
@@ -31,12 +33,11 @@ class ConfirmImageActivity : AppCompatActivity() {
         image = Utils.getImageByteArray()
         image?.let {
             val bitmap: Bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-            binding.imageView.setImageBitmap(bitmap);
+            binding.imageView.setImageBitmap(bitmap)
         }
 
         supportActionBar?.hide()
         setContentView(binding.root)
-
 
         binding.floatButtonCancel.setOnClickListener { cancelImage() }
         binding.floatButtonAccept.setOnClickListener { processImage() }
@@ -44,7 +45,6 @@ class ConfirmImageActivity : AppCompatActivity() {
 
     private fun processImage() {
         image?.let {
-//            Utils.saveImageStores(it, user, this)
             Utils.classify(this, it, user)
             val intent = Intent(this@ConfirmImageActivity, ClassifyActivity::class.java)
             startActivity(intent)

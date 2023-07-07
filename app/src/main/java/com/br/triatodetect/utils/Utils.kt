@@ -8,12 +8,11 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.location.Location
 import android.media.Image
-import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.br.triatodetect.models.Imagem
-import com.br.triatodetect.models.StatusImagem
+import com.br.triatodetect.models.Img
+import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -44,6 +43,7 @@ object Utils {
     private var imageByteArray: ByteArray? = null
     var result: MutableList<String> = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private const val reduceImage: Int = 2
 
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
@@ -61,17 +61,33 @@ object Utils {
             }
     }
 
-    private fun compressImage(imageData: ByteArray, quality: Int): ByteArray {
-        val bitmap: Bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
-        return outputStream.toByteArray()
+    fun listImagesUser(email: String?, collection: String, callback: (Array<Img>) -> Unit) {
+        val result = mutableListOf<Img>()
+        db.collection(collection)
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val image = document.toObject(Img::class.java)
+                    result.add(image)
+                }
+                callback(result.toTypedArray())
+            }
+            .addOnFailureListener { exception ->
+                Log.e("List", "Error getting documents.", exception)
+                callback(emptyArray())
+            }
     }
 
-    private fun rotateByteArrayImage(imageData: ByteArray, degrees: Int): ByteArray {
-        // Convert ByteArray to Bitmap
-        val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
 
+    private fun rotateByteArrayImage(imageData: ByteArray, degrees: Int, width: Int, height: Int): ByteArray {
+        // Convert ByteArray to Bitmap
+        var bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+        //Reduzir resolução da imagem - (melhorar desempenho)
+        bitmap = Bitmap.createScaledBitmap(bitmap,
+            width/reduceImage,
+            height/reduceImage,
+            true)
         // Perform rotation on the Bitmap
         val matrix = Matrix()
         matrix.postRotate(degrees.toFloat())
@@ -84,15 +100,15 @@ object Utils {
         return outputStream.toByteArray()
     }
 
-    private fun imageToByteArray(image: Image, degrees: Int): ByteArray {
+    private fun processImage(image: Image, degrees: Int): ByteArray {
         val buffer: ByteBuffer = image.planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
+        var bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return rotateByteArrayImage(bytes, degrees)
+        return rotateByteArrayImage(bytes, degrees, image.width, image.height)
     }
 
     fun setImageByteArray(image: Image, degrees: Int) {
-        imageByteArray = imageToByteArray(image, degrees)
+        imageByteArray = processImage(image, degrees)
     }
 
     fun getImageByteArray(): ByteArray? {
@@ -103,9 +119,7 @@ object Utils {
         imageByteArray = null
     }
 
-
     private fun saveImageStores(image: ByteArray, user: User?, context: Context) {
-        val imageComp = this.compressImage(image, 30)
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
 
@@ -115,7 +129,7 @@ object Utils {
             val insectImagesRef:StorageReference = storageRef
                 .child("Images/${email}/${imageName}")
 
-            var uploadTask: UploadTask = insectImagesRef.putBytes(imageComp)
+            var uploadTask: UploadTask = insectImagesRef.putBytes(image)
             uploadTask.addOnFailureListener {e ->
                 Log.e("Insert", "Error adding image", e)
             }.addOnSuccessListener { taskSnapshot ->
@@ -137,13 +151,13 @@ object Utils {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location : Location? ->
                     if(location != null) {
-                        val rowImage = Imagem(
+                        val rowImage = Img(
                             imageName, user?.email,
                             location.latitude, location.longitude,
-                            StatusImagem.AGUARDANDO_CONFIRMACAO,
+                            StatusImage.AGUARDANDO_CONFIRMACAO,
                             result[0],
-                            result[1]
-                        );
+                            result[1].toDouble()
+                        )
                         this.insertNewObject(rowImage, "Images")
                     }
                 }
@@ -176,8 +190,6 @@ object Utils {
         }
         val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
-        //var inferenceTime = SystemClock.uptimeMillis()
-
         val imageProcessor =
             ImageProcessor.Builder()
                 .build()
@@ -193,8 +205,6 @@ object Utils {
             result.add(classifications[0].categories[0].score.toString())
             this.saveImageStores(bytes, user, context)
         }
-        //inferenceTime = SystemClock.uptimeMillis() - inferenceTime
-
     }
 
 }

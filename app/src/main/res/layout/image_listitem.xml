@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp">
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/image_date"
+            android:textSize="10pt"
+            android:text="12/05/2023 - 19:25"
+            android:textColor="@android:color/black"
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:shadowColor="@color/black"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1"
+            android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/image_status"
+            android:layout_weight="1"
+            android:text="PENDENTE"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/image_classify"
+            android:layout_weight="1"
+            android:text="Não Definido"
+            android:textColor="#C63650"
+            android:textStyle="italic"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>
