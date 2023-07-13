@@ -10,4 +10,5 @@ class Img(
     val status: StatusImage = StatusImage.PENDENTE,
     val label: String? = null,
     val score: Double? = null,
+    val date: Date? = Date()
 )

@@ -16,6 +16,7 @@ import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
@@ -46,7 +47,10 @@ object Utils {
     private const val reduceImage: Int = 2
 
     fun checkPermission(context: Context, permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+        return ContextCompat.checkSelfPermission(
+            context,
+            permission
+        ) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun insertNewObject(obj: Any, collection: String) {
@@ -65,6 +69,7 @@ object Utils {
         val result = mutableListOf<Img>()
         db.collection(collection)
             .whereEqualTo("email", email)
+            .orderBy("date", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 for (document in querySnapshot) {
@@ -79,19 +84,26 @@ object Utils {
             }
     }
 
-
-    private fun rotateByteArrayImage(imageData: ByteArray, degrees: Int, width: Int, height: Int): ByteArray {
+    private fun rotateByteArrayImage(
+        imageData: ByteArray,
+        degrees: Int,
+        width: Int,
+        height: Int
+    ): ByteArray {
         // Convert ByteArray to Bitmap
         var bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
         //Reduzir resolução da imagem - (melhorar desempenho)
-        bitmap = Bitmap.createScaledBitmap(bitmap,
-            width/reduceImage,
-            height/reduceImage,
-            true)
+        bitmap = Bitmap.createScaledBitmap(
+            bitmap,
+            width / reduceImage,
+            height / reduceImage,
+            true
+        )
         // Perform rotation on the Bitmap
         val matrix = Matrix()
         matrix.postRotate(degrees.toFloat())
-        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        val rotatedBitmap =
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
         // Convert Bitmap to ByteArray
         val outputStream = ByteArrayOutputStream()
@@ -112,7 +124,7 @@ object Utils {
     }
 
     fun getImageByteArray(): ByteArray? {
-       return imageByteArray
+        return imageByteArray
     }
 
     fun resetImageByteArray() {
@@ -124,13 +136,13 @@ object Utils {
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
 
         //salvando imagem no Firestore(DB)
-        user?.email?.let {email: String ->
+        user?.email?.let { email: String ->
             storageRef = storage.reference
-            val insectImagesRef:StorageReference = storageRef
+            val insectImagesRef: StorageReference = storageRef
                 .child("Images/${email}/${imageName}")
 
             var uploadTask: UploadTask = insectImagesRef.putBytes(image)
-            uploadTask.addOnFailureListener {e ->
+            uploadTask.addOnFailureListener { e ->
                 Log.e("Insert", "Error adding image", e)
             }.addOnSuccessListener { taskSnapshot ->
                 taskSnapshot.metadata?.reference
@@ -147,10 +159,11 @@ object Utils {
                 context,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
-                    )) {
+                    )
+        ) {
             fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
-                    if(location != null) {
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) {
                         val rowImage = Img(
                             imageName, user?.email,
                             location.latitude, location.longitude,
@@ -163,6 +176,7 @@ object Utils {
                 }
         }
     }
+
     private fun setupImageClassifier(context: Context) {
         val optionsBuilder = ImageClassifier.ImageClassifierOptions.builder()
             .setScoreThreshold(threshold)
@@ -183,7 +197,7 @@ object Utils {
     }
 
 
-    fun classify(context: Context, bytes: ByteArray, user:User?) {
+    fun classify(context: Context, bytes: ByteArray, user: User?) {
         result.clear()
         if (imageClassifier == null) {
             setupImageClassifier(context)
@@ -200,7 +214,7 @@ object Utils {
 
         val classifications = imageClassifier?.classify(tensorImage, imageProcessingOptions)
 
-        if(!classifications.isNullOrEmpty()) {
+        if (!classifications.isNullOrEmpty()) {
             result.add(classifications[0].categories[0].label)
             result.add(classifications[0].categories[0].score.toString())
             this.saveImageStores(bytes, user, context)

@@ -1,11 +1,15 @@
 package com.br.triatodetect.ui.home.listImage
 
+import android.icu.text.SimpleDateFormat
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
+import java.text.DateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 
 class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -29,8 +33,7 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
     }
 
     fun bindImage(image: Img) {
-        this.image = image
-        imageDate.text = image.email
+        imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
         imageStatus.text = image.status.name
         imageClassify.text = image.label
     }
