@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-         android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="5dp">
     <androidx.cardview.widget.CardView
@@ -11,43 +12,61 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         card_view:cardBackgroundColor="@color/blue_card"
-        card_view:contentPadding="10dp"
+        card_view:contentPadding="8dp"
         card_view:cardCornerRadius="10dp"
         card_view:cardElevation="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/image_date"
-                android:textSize="8pt"
-                android:text="12/05/2023 - 19:25"
-                android:textColor="@android:color/black"
-                android:layout_width="wrap_content"
-                android:textStyle="bold"
-                android:shadowColor="@color/black"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="1"
-                android:layout_height="match_parent" />
-            <TextView
-                android:id="@+id/image_status"
-                android:layout_weight="1"
-                android:text="PENDENTE"
-                android:textSize="6pt"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
-            <TextView
-                android:id="@+id/image_classify"
-                android:layout_weight="1"
-                android:text="Não Definido"
-                android:textColor="#C63650"
-                android:textStyle="italic | bold"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image_image"
+                android:layout_height="70dp"
+                android:layout_width="70dp"
+                android:padding="2dp"
+                android:layout_margin="5dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="@android:color/darker_gray"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                ></com.google.android.material.imageview.ShapeableImageView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/image_date"
+                    android:textSize="8pt"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                    android:shadowColor="@color/black"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="1"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:id="@+id/image_status"
+                    android:layout_weight="1"
+                    android:textSize="6pt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:id="@+id/image_classify"
+                    android:layout_weight="1"
+                    android:textColor="#C63650"
+                    android:textStyle="italic | bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
 </LinearLayout>

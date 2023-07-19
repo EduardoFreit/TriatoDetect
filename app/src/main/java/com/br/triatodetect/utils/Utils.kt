@@ -29,6 +29,15 @@ import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.RectF
 
 object Utils {
 
@@ -44,7 +53,7 @@ object Utils {
     private var imageByteArray: ByteArray? = null
     var result: MutableList<String> = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private const val reduceImage: Int = 2
+    private const val reduceImage: Int = 4
 
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -135,7 +144,7 @@ object Utils {
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${IMAGE_EXTENSION}"
 
-        //salvando imagem no Firestore(DB)
+        //salvando imagem no CloudStore
         user?.email?.let { email: String ->
             storageRef = storage.reference
             val insectImagesRef: StorageReference = storageRef
@@ -150,7 +159,7 @@ object Utils {
             }
         }
 
-        //Salvando imagem no CloudStore
+        //Salvando imagem no Firestore(DB)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (!(ActivityCompat.checkSelfPermission(
                 context,
@@ -218,6 +227,44 @@ object Utils {
             result.add(classifications[0].categories[0].label)
             result.add(classifications[0].categories[0].score.toString())
             this.saveImageStores(bytes, user, context)
+        }
+    }
+
+    fun getRoundedCornerBitmap(bitmap: Bitmap, pixels: Int): Bitmap {
+        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+
+        val color = 0xff424242.toInt()
+        val paint = Paint()
+        val rect = Rect(0, 0, bitmap.width, bitmap.height)
+        val rectF = RectF(rect)
+        val roundPx = pixels.toFloat()
+
+        paint.isAntiAlias = true
+        canvas.drawARGB(0, 0, 0, 0)
+        paint.color = color
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
+
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(bitmap, rect, rect, paint)
+
+        return output
+    }
+
+    suspend fun retrieveImage(user: User, image: Img): ByteArray? = suspendCoroutine { continuation ->
+        user.email?.let { email: String ->
+            storageRef = storage.reference
+            val insectImagesRef: StorageReference = storageRef
+                .child("Images/${email}/${image.imageName}")
+
+            val ONE_MEGABYTE: Long = 1024 * 1024
+            insectImagesRef.getBytes(ONE_MEGABYTE)
+                .addOnSuccessListener { bytes ->
+                    continuation.resume(bytes)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
         }
     }
 
