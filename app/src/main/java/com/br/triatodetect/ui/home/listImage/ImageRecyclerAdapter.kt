@@ -10,9 +10,8 @@ import com.br.triatodetect.models.Img
 import com.br.triatodetect.utils.SessionManager
 
 
-class ImageRecyclerAdapter(private val images: Array<Img>,private val applicationContext: Context) : RecyclerView.Adapter<ImageHolder>() {
+class ImageRecyclerAdapter(private val images: Array<Img>) : RecyclerView.Adapter<ImageHolder>() {
 
-    private lateinit var sessionManager: SessionManager
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
         val inflatedView: View = LayoutInflater.from(parent.context)
                 .inflate(R.layout.image_listitem, parent, false)

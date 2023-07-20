@@ -6,9 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
@@ -24,25 +22,29 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
     private val imageStatus: TextView
     private val imageClassify: TextView
     private val imageImage: ImageView
+    private val imageLocalization: TextView
     private var user: User? = null
+    private var imageObject: Img? = null
 
     init {
         imageDate = itemView.findViewById(R.id.image_date)
         imageStatus = itemView.findViewById(R.id.image_status)
         imageClassify = itemView.findViewById(R.id.image_classify)
         imageImage = itemView.findViewById(R.id.image_image)
+        imageLocalization = itemView.findViewById(R.id.image_localization)
         val sessionManager = SessionManager.getInstance(itemView.context)
         user = sessionManager.getUserData()
         itemView.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
-        val modalBottomSheet = ModalBottomSheet()
+        val modalBottomSheet = ModalDetailsImage(imageObject)
         val fragment = v.context as? AppCompatActivity
-        modalBottomSheet.show(fragment!!.supportFragmentManager, ModalBottomSheet.TAG)
+        modalBottomSheet.show(fragment!!.supportFragmentManager, ModalDetailsImage.TAG)
     }
 
     fun bindImage(image: Img) {
+        imageObject = image
         GlobalScope.launch {
             try {
                 val bytes = Utils.retrieveImage(user!!, image)
@@ -55,6 +57,7 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
                 Log.e("Download", "Error downloading image", exception)
             }
         }
+        imageLocalization.text =  Utils.getCityAndStateFromLocation(itemView.context, image.latitude!!, image.longitude!!)
         imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
         imageStatus.text = image.status.name
         imageClassify.text = image.label

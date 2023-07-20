@@ -38,6 +38,11 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
+import android.location.Address
+import android.location.Geocoder
+import android.os.Build
+import java.io.IOException
+import java.util.Locale
 
 object Utils {
 
@@ -205,7 +210,6 @@ object Utils {
         }
     }
 
-
     fun classify(context: Context, bytes: ByteArray, user: User?) {
         result.clear()
         if (imageClassifier == null) {
@@ -230,27 +234,6 @@ object Utils {
         }
     }
 
-    fun getRoundedCornerBitmap(bitmap: Bitmap, pixels: Int): Bitmap {
-        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(output)
-
-        val color = 0xff424242.toInt()
-        val paint = Paint()
-        val rect = Rect(0, 0, bitmap.width, bitmap.height)
-        val rectF = RectF(rect)
-        val roundPx = pixels.toFloat()
-
-        paint.isAntiAlias = true
-        canvas.drawARGB(0, 0, 0, 0)
-        paint.color = color
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
-
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(bitmap, rect, rect, paint)
-
-        return output
-    }
-
     suspend fun retrieveImage(user: User, image: Img): ByteArray? = suspendCoroutine { continuation ->
         user.email?.let { email: String ->
             storageRef = storage.reference
@@ -265,6 +248,32 @@ object Utils {
                 .addOnFailureListener { exception ->
                     continuation.resumeWithException(exception)
                 }
+        }
+    }
+
+    fun getCityAndStateFromLocation(context: Context, latitude: Double, longitude: Double): String? {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        var city = ""
+        var state = ""
+
+        try {
+            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                city = address.locality ?: ""
+                if(city.isNullOrBlank()) {
+                    city = address.subAdminArea ?: ""
+                }
+                state = address.adminArea ?: ""
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return if (city.isNotEmpty() && state.isNotEmpty()) {
+            "$city - $state"
+        } else {
+            null
         }
     }
 

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,12 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.databinding.ActivityHomeBinding
 import com.br.triatodetect.models.Img
-import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.BaseActivity
 import com.br.triatodetect.ui.camera.CameraActivity
 import com.br.triatodetect.ui.home.listImage.ImageRecyclerAdapter
-import com.br.triatodetect.ui.home.listImage.ModalBottomSheet
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import java.util.Objects
@@ -49,9 +46,6 @@ class HomeActivity : BaseActivity() {
         val nameTitle: String = getString(R.string.welcome_title, name);
         supportActionBar ?.title = nameTitle
 
-        val modalBottomSheet = ModalBottomSheet()
-        modalBottomSheet.show(this.supportFragmentManager, ModalBottomSheet.TAG)
-
         binding.floatButtonCamera.setOnClickListener { this.openInstructionCamera() }
 
     }
@@ -61,7 +55,7 @@ class HomeActivity : BaseActivity() {
         Utils.listImagesUser(user!!.email, "Images") { listImages: Array<Img> ->
             val recyclerView: RecyclerView = findViewById(binding.listView.id)
             recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = ImageRecyclerAdapter(listImages, applicationContext)
+            recyclerView.adapter = ImageRecyclerAdapter(listImages)
         }
     }
 
