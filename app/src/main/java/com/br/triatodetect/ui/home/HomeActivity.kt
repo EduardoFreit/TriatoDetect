@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,7 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.BaseActivity
 import com.br.triatodetect.ui.camera.CameraActivity
 import com.br.triatodetect.ui.home.listImage.ImageRecyclerAdapter
+import com.br.triatodetect.ui.maps.MapsActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import java.util.Objects
@@ -46,7 +48,8 @@ class HomeActivity : BaseActivity() {
         val nameTitle: String = getString(R.string.welcome_title, name);
         supportActionBar ?.title = nameTitle
 
-        binding.floatButtonCamera.setOnClickListener { this.openInstructionCamera() }
+        binding.floatButtonCamera.setOnClickListener { this.openCamera() }
+        binding.floatButtonMaps.setOnClickListener { this.openMaps() }
 
     }
 
@@ -89,8 +92,13 @@ class HomeActivity : BaseActivity() {
         }
     }
 
-    private fun openInstructionCamera() {
+    private fun openCamera() {
         val intent = Intent(this, CameraActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openMaps() {
+        val intent = Intent(this, MapsActivity::class.java)
         startActivity(intent)
     }
 

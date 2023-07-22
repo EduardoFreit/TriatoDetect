@@ -1,5 +1,6 @@
 package com.br.triatodetect.ui.home.listImage
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
 import android.util.Log
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
+import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
@@ -22,23 +24,22 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
     private val imageStatus: TextView
     private val imageClassify: TextView
     private val imageImage: ImageView
-    private val imageLocalization: TextView
     private var user: User? = null
     private var imageObject: Img? = null
+    private var bitmap: Bitmap? = null
 
     init {
         imageDate = itemView.findViewById(R.id.image_date)
         imageStatus = itemView.findViewById(R.id.image_status)
         imageClassify = itemView.findViewById(R.id.image_classify)
         imageImage = itemView.findViewById(R.id.image_image)
-        imageLocalization = itemView.findViewById(R.id.image_localization)
         val sessionManager = SessionManager.getInstance(itemView.context)
         user = sessionManager.getUserData()
         itemView.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
-        val modalBottomSheet = ModalDetailsImage(imageObject)
+        val modalBottomSheet = ModalDetailsImage(imageObject, user, bitmap)
         val fragment = v.context as? AppCompatActivity
         modalBottomSheet.show(fragment!!.supportFragmentManager, ModalDetailsImage.TAG)
     }
@@ -49,7 +50,7 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
             try {
                 val bytes = Utils.retrieveImage(user!!, image)
                 if (bytes != null) {
-                    var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     imageImage.setImageBitmap(bitmap)
                 }
             } catch (exception: Exception) {
@@ -57,9 +58,25 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
                 Log.e("Download", "Error downloading image", exception)
             }
         }
-        imageLocalization.text =  Utils.getCityAndStateFromLocation(itemView.context, image.latitude!!, image.longitude!!)
         imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
-        imageStatus.text = image.status.name
-        imageClassify.text = image.label
+
+        val textStatus: String = when (image.status) {
+            StatusImage.PENDENTE -> itemView.context.getString(R.string.pendente).trim().uppercase()
+            StatusImage.AGUARDANDO_CONFIRMACAO -> itemView.context.getString(R.string.aguardando_confirmacao).trim().uppercase()
+            StatusImage.FINALIZADO -> itemView.context.getString(R.string.finalizado).trim().uppercase()
+        }
+
+        imageStatus.text = textStatus
+
+        val textClassify: String = when (image.label) {
+            "tb" -> itemView.context.getString(R.string.tb)
+            "tp" -> itemView.context.getString(R.string.tp)
+            "pm" -> itemView.context.getString(R.string.pm)
+            "pl" -> itemView.context.getString(R.string.pl)
+            "un" -> itemView.context.getString(R.string.un)
+            else -> itemView.context.getString(R.string.un)
+        }
+
+        imageClassify.text = textClassify
     }
 }

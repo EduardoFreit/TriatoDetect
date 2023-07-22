@@ -10,6 +10,7 @@ import android.view.Surface
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.classify.ClassifyActivity
+import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -46,7 +47,7 @@ class ConfirmImageActivity : AppCompatActivity() {
     private fun processImage() {
         image?.let {
             Utils.classify(this, it, user)
-            val intent = Intent(this@ConfirmImageActivity, ClassifyActivity::class.java)
+            val intent = Intent(this@ConfirmImageActivity, HomeActivity::class.java)
             startActivity(intent)
             finish()
         }

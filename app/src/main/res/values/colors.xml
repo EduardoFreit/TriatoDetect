@@ -14,5 +14,11 @@
     <color name="blue_700">#FF042847</color>
     <color name="blue_card">#DAE9F5</color>
 
+    <color name="tb">#006683</color>
+    <color name="tp">#8622FF</color>
+    <color name="pm">#367238</color>
+    <color name="pl">#DAA60A</color>
+    <color name="un">#831111</color>
+
 
 </resources>

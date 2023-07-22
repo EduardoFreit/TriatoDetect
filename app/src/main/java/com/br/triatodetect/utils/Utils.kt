@@ -98,6 +98,23 @@ object Utils {
             }
     }
 
+    fun listDocuments(collection: String, callback: (Array<Img>) -> Unit) {
+        val result = mutableListOf<Img>()
+        db.collection(collection)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val image = document.toObject(Img::class.java)
+                    result.add(image)
+                }
+                callback(result.toTypedArray())
+            }
+            .addOnFailureListener { exception ->
+                Log.e("List", "Error getting documents.", exception)
+                callback(emptyArray())
+            }
+    }
+
     private fun rotateByteArrayImage(
         imageData: ByteArray,
         degrees: Int,

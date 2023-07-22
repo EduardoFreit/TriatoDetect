@@ -11,4 +11,16 @@
     <string name="instruction_picture">1. Coloque o triatomíneo em um fundo branco;\n2. Centralize o Triatomineo no fundo escolhido ;\n3. A foto deve ser tirada na vertical;</string>
     <string name="instruction_button">Tirar Foto</string>
     <string name="title_activity_classify">ClassifyActivity</string>
+
+    <string name="tb">Triatoma Brasiliensis</string>
+    <string name="tp">Triatoma Pseudomaculata</string>
+    <string name="pm">Panstrongylus Megistus</string>
+    <string name="pl">Panstrongylus Lutzi</string>
+    <string name="un">Indefinido</string>
+
+    <string name="pendente">Pendente</string>
+    <string name="aguardando_confirmacao">Aguardando Confirmação</string>
+    <string name="finalizado">Finalizado</string>
+    <string name="title_activity_maps">Mapa</string>
+
 </resources>
