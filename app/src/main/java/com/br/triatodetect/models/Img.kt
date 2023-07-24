@@ -1,7 +1,6 @@
 package com.br.triatodetect.models
 
 import java.util.Date
-
 class Img(
     val imageName: String? = null,
     val email: String? = null,

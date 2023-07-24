@@ -3,7 +3,6 @@ package com.br.triatodetect.ui.home.listImage
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,8 +14,6 @@ import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {

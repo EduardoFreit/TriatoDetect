@@ -19,14 +19,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:layout_marginTop="10dp"
-        android:backgroundTint="@color/transparent"
         app:fabCustomSize="40dp"
         app:maxImageSize="30dp"
         app:layout_constraintEnd_toEndOf="@id/vertical_endLine"
         app:layout_constraintStart_toStartOf="@id/vertical_endLine"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/baseline_close_24"
-        app:borderWidth="0dp"
         app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -44,6 +42,18 @@
         app:layout_constraintStart_toStartOf="@id/vertical_centerline"
         app:layout_constraintEnd_toEndOf="@id/vertical_centerline" />
 
+    <ImageView
+        android:id="@+id/dlimit"
+        android:layout_width="700dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:elevation="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/vertical_centerline"
+        app:layout_constraintStart_toStartOf="@id/vertical_centerline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_crop_16_9_24" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_centerline"
         android:layout_width="wrap_content"
@@ -57,5 +67,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent=".90" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

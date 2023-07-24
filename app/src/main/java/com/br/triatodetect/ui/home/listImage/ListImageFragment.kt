@@ -12,9 +12,6 @@ import com.br.triatodetect.databinding.FragmentListImageBinding
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
-import com.br.triatodetect.utils.Utils
-import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.Query
 
 class ListImageFragment : Fragment() {
     private var _binding: FragmentListImageBinding? = null

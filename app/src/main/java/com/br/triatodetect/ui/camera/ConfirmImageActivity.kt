@@ -12,6 +12,7 @@ import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.br.triatodetect.R
 
 class ConfirmImageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityConfirmImageBinding
@@ -34,7 +35,7 @@ class ConfirmImageActivity : AppCompatActivity() {
             binding.imageView.setImageBitmap(bitmap)
         }
 
-        supportActionBar?.hide()
+        supportActionBar?.title = getString(R.string.confirm_image)
         setContentView(binding.root)
 
         binding.floatButtonCancel.setOnClickListener { cancelImage() }

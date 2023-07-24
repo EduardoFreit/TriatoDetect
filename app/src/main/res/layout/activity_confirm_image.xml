@@ -10,35 +10,42 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blue_200"
+        android:background="@color/transparent"
+        android:paddingHorizontal="15dp"
+        android:paddingBottom="15dp"
         android:scaleType="fitCenter" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/float_button_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="50dp"
-        app:srcCompat="@drawable/baseline_close_24"
-        app:tint="@color/white"
+        android:layout_marginBottom="30dp"
+        android:text="@string/cancel"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:iconTint="@color/white"
+        app:iconSize="25dp"
         app:backgroundTint="@color/design_default_color_error"
-        app:fabCustomSize="80dp"
-        app:maxImageSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:icon="@drawable/baseline_close_24"
         app:layout_constraintStart_toStartOf="@id/vertical_centerline"
         app:layout_constraintEnd_toEndOf="@id/vertical_centerline" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/float_button_accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="50dp"
-        app:srcCompat="@drawable/baseline_check_24"
+        android:layout_marginBottom="30dp"
+        android:text="@string/confirm"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:iconTint="@color/white"
+        app:iconSize="25dp"
+        app:icon="@drawable/baseline_check_24"
         app:tint="@color/white"
         app:backgroundTint="@color/green"
-        app:fabCustomSize="80dp"
-        app:maxImageSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@id/vertical_centerline2"
         app:layout_constraintEnd_toEndOf="@id/vertical_centerline2" />
@@ -48,13 +55,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent=".20" />
+        app:layout_constraintGuide_percent=".25" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical_centerline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent=".80" />
+        app:layout_constraintGuide_percent=".75" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

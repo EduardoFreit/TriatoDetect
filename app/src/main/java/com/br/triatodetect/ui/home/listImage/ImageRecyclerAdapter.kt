@@ -1,14 +1,11 @@
 package com.br.triatodetect.ui.home.listImage
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
-import com.br.triatodetect.utils.SessionManager
-
 
 class ImageRecyclerAdapter(private val images: Array<Img>) : RecyclerView.Adapter<ImageHolder>() {
 

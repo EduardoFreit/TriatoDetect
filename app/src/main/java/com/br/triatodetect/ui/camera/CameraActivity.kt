@@ -7,7 +7,6 @@ import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.OrientationEventListener
 import android.view.Surface
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,7 +30,7 @@ import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
 
-    private lateinit var viewBinding: ActivityCameraBinding
+    private lateinit var binding: ActivityCameraBinding
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var sessionManager: SessionManager
@@ -39,14 +38,14 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinding = ActivityCameraBinding.inflate(layoutInflater)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
 
 
         sessionManager = SessionManager.getInstance(applicationContext)
         this.user = sessionManager.getUserData()
 
         supportActionBar?.hide()
-        setContentView(viewBinding.root)
+        setContentView(binding.root)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -55,11 +54,13 @@ class CameraActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        viewBinding.floatButtonCamera.setOnClickListener {
+        binding.floatButtonCamera.setOnClickListener {
             takePhoto()
         }
 
-        viewBinding.floatCloseCamera.setOnClickListener { closeCamera() }
+        binding.floatCloseCamera.setOnClickListener { closeCamera() }
+
+        binding.dlimit.rotation = 90f
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -67,7 +68,7 @@ class CameraActivity : AppCompatActivity() {
     private fun takePhoto() {
         imageCapture.targetRotation = Surface.ROTATION_0
         imageCapture.takePicture(
-            ContextCompat.getMainExecutor(viewBinding.root.context),
+            ContextCompat.getMainExecutor(binding.root.context),
             @ExperimentalGetImage object : ImageCapture.OnImageCapturedCallback() {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
@@ -95,7 +96,7 @@ class CameraActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder().apply {
