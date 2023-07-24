@@ -32,12 +32,6 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".ui.maps.MapsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_maps"
-            android:parentActivityName=".ui.home.HomeActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".ui.camera.ConfirmImageActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

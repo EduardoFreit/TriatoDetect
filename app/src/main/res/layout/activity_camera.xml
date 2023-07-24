@@ -13,16 +13,20 @@
         android:layout_height="match_parent"
         />
 
-    <ImageView
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/float_close_camera"
-        android:layout_width="48dp"
-        android:layout_height="64dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:elevation="5dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/transparent"
+        app:fabCustomSize="40dp"
+        app:maxImageSize="30dp"
         app:layout_constraintEnd_toEndOf="@id/vertical_endLine"
         app:layout_constraintStart_toStartOf="@id/vertical_endLine"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/baseline_close_24"
+        app:borderWidth="0dp"
         app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

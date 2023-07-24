@@ -4,23 +4,17 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.databinding.ActivityHomeBinding
-import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.BaseActivity
 import com.br.triatodetect.ui.camera.CameraActivity
-import com.br.triatodetect.ui.home.listImage.ImageRecyclerAdapter
-import com.br.triatodetect.ui.maps.MapsActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -50,14 +44,10 @@ class HomeActivity : BaseActivity() {
             .replaceFirstChar {
                 it.uppercase()
             }
-        val nameTitle: String = getString(R.string.welcome_title, name);
-        supportActionBar ?.title = nameTitle
 
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_images, R.id.navigation_map
@@ -67,18 +57,6 @@ class HomeActivity : BaseActivity() {
         navView.setupWithNavController(navController)
 
         binding.floatButtonCamera.setOnClickListener { this.openCamera() }
-//        binding.floatButtonMaps.setOnClickListener { this.openMaps() }
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-//        Utils.listImagesUser(user!!.email, "Images") { listImages: Array<Img> ->
-//            val recyclerView: RecyclerView = findViewById(binding.listView.id)
-//            recyclerView.layoutManager = LinearLayoutManager(this)
-//            recyclerView.adapter = ImageRecyclerAdapter(listImages)
-//        }
     }
 
     override fun onBackPressed() {
@@ -113,11 +91,6 @@ class HomeActivity : BaseActivity() {
 
     private fun openCamera() {
         val intent = Intent(this, CameraActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun openMaps() {
-        val intent = Intent(this, MapsActivity::class.java)
         startActivity(intent)
     }
 

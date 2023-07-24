@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.util.Objects
 
 class MapsFragment : Fragment() {
 
@@ -56,38 +57,52 @@ class MapsFragment : Fragment() {
             ) != PackageManager.PERMISSION_GRANTED
                     )
         ) {
-            val zoomLevel = 6.3f
-            val userLocation = LatLng(-8.363123, -37.861396)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel)
-            mMap.moveCamera(cameraUpdate)
+            if(Utils.args == null) {
+                val zoomLevel = 6.3f
+                val userLocation = LatLng(-8.363123, -37.861396)
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel)
+                mMap.moveCamera(cameraUpdate)
 
-            Utils.listDocuments("Images") { listImages: Array<Img> ->
-                // Add a marker in Sydney and move the camera
+                Utils.listDocuments("Images") { listImages: Array<Img> ->
+                    // Add a marker in Sydney and move the camera
 
-                for (image in listImages) {
-                    val localization = LatLng(image.latitude!!, image.longitude!!)
+                    for (image in listImages) {
+                        val localization = LatLng(image.latitude!!, image.longitude!!)
 
-                    val textClassify: String = when (image.label) {
-                        "tb" -> getString(R.string.tb)
-                        "tp" -> getString(R.string.tp)
-                        "pm" -> getString(R.string.pm)
-                        "pl" -> getString(R.string.pl)
-                        else -> getString(R.string.un)
+                        val textClassify: String = when (image.label) {
+                            "tb" -> getString(R.string.tb)
+                            "tp" -> getString(R.string.tp)
+                            "pm" -> getString(R.string.pm)
+                            "pl" -> getString(R.string.pl)
+                            else -> getString(R.string.un)
+                        }
+
+                        val colorClassify: String = when (image.label) {
+                            "tb" -> this.colorToHex(binding.root.context, R.color.tb)
+                            "tp" -> this.colorToHex(binding.root.context, R.color.tp)
+                            "pm" -> this.colorToHex(binding.root.context, R.color.pm)
+                            "pl" -> this.colorToHex(binding.root.context, R.color.pl)
+                            else -> this.colorToHex(binding.root.context, R.color.un)
+                        }
+
+                        val imageDate: String? = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
+
+                        mMap.addMarker(MarkerOptions().position(localization).title(textClassify).snippet(imageDate))?.setIcon(
+                            getMarkerIcon(colorClassify))
                     }
-
-                    val colorClassify: String = when (image.label) {
-                        "tb" -> this.colorToHex(binding.root.context, R.color.tb)
-                        "tp" -> this.colorToHex(binding.root.context, R.color.tp)
-                        "pm" -> this.colorToHex(binding.root.context, R.color.pm)
-                        "pl" -> this.colorToHex(binding.root.context, R.color.pl)
-                        else -> this.colorToHex(binding.root.context, R.color.un)
-                    }
-
-                    val imageDate = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
-
-                    mMap.addMarker(MarkerOptions().position(localization).title(textClassify).snippet(imageDate))?.setIcon(
-                        getMarkerIcon(colorClassify))
                 }
+            } else {
+                val latitudeImageSelect: Double? = Utils.args?.getDouble(LATITUDE_IMAGE)
+                val longitudeImageSelect: Double? = Utils.args?.getDouble(LONGITUDE_IMAGE)
+                val classifyImageSelect: String? = Utils.args?.getString(CLASSIFY)
+                val dateImageSelect: String? = Utils.args?.getString(DATE)
+                val zoomLevel = 13.0f
+                val localization = LatLng(latitudeImageSelect!!, longitudeImageSelect!!)
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(localization, zoomLevel)
+                Utils.args = null
+
+                mMap.moveCamera(cameraUpdate)
+                mMap.addMarker(MarkerOptions().position(localization).title(classifyImageSelect).snippet(dateImageSelect))
             }
         }
     }
@@ -105,5 +120,12 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+    }
+
+    companion object {
+        const val LATITUDE_IMAGE = "latitude"
+        const val LONGITUDE_IMAGE = "longitude"
+        const val CLASSIFY = "classify"
+        const val DATE = "date"
     }
 }

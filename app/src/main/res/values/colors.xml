@@ -20,5 +20,7 @@
     <color name="pl">#DAA60A</color>
     <color name="un">#831111</color>
 
+    <color name="transparent">#AAAAAA</color>
+
 
 </resources>

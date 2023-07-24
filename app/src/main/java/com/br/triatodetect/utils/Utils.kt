@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import android.location.Address
 import android.location.Geocoder
+import android.os.Bundle
 import java.io.IOException
 import java.util.Locale
 
@@ -49,7 +50,7 @@ object Utils {
     var result: MutableList<String> = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private const val reduceImage: Int = 4
-
+    var args: Bundle? = null
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
