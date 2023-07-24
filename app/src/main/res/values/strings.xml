@@ -22,5 +22,10 @@
     <string name="aguardando_confirmacao">Aguardando Confirmação</string>
     <string name="finalizado">Finalizado</string>
     <string name="title_activity_maps">Mapa</string>
+    <string name="map">Mapa</string>
+    <string name="list_image">Imagens</string>
+    <string name="camera">Camera</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

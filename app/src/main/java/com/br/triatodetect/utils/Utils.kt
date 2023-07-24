@@ -29,18 +29,8 @@ import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.RectF
 import android.location.Address
 import android.location.Geocoder
-import android.os.Build
 import java.io.IOException
 import java.util.Locale
 
@@ -48,7 +38,7 @@ object Utils {
 
     private val db = Firebase.firestore
     private val storage = Firebase.storage
-    private lateinit var storageRef: StorageReference
+    lateinit var storageRef: StorageReference
     private const val threshold: Float = 0.65f
     private const val maxResults: Int = 1
     private const val numThreads: Int = 5
@@ -251,7 +241,7 @@ object Utils {
         }
     }
 
-    suspend fun retrieveImage(user: User, image: Img): ByteArray? = suspendCoroutine { continuation ->
+    fun retrieveImage(user: User, image: Img, callback: (ByteArray?) -> Unit) {
         user.email?.let { email: String ->
             storageRef = storage.reference
             val insectImagesRef: StorageReference = storageRef
@@ -260,10 +250,10 @@ object Utils {
             val ONE_MEGABYTE: Long = 1024 * 1024
             insectImagesRef.getBytes(ONE_MEGABYTE)
                 .addOnSuccessListener { bytes ->
-                    continuation.resume(bytes)
+                    callback(bytes)
                 }
                 .addOnFailureListener { exception ->
-                    continuation.resumeWithException(exception)
+                    callback(null)
                 }
         }
     }

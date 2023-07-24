@@ -33,20 +33,17 @@ class SessionManager private constructor(private val context: Context) {
     }
 
     companion object {
-
         private const val SHARED_PREFS = "TriatokeyPreference"
         private const val USER_EMAIL = "user_email"
         private const val USER_NAME = "user_name"
 
+        @Volatile
         private var instance: SessionManager? = null
 
-        fun getInstance(context: Context): SessionManager {
-            if (instance == null) {
-                instance = SessionManager(context)
+        fun getInstance(context: Context) =
+            instance ?: synchronized(this) {
+                instance ?: SessionManager(context).also { instance = it }
             }
-            return instance as SessionManager
-        }
     }
-
 
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_images">
+
+    <fragment
+        android:id="@+id/navigation_images"
+        android:name="com.br.triatodetect.ui.home.listImage.ListImageFragment"
+        android:label="@string/list_image"
+        tools:layout="@layout/fragment_list_image" />
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.br.triatodetect.ui.home.map.MapsFragment"
+        android:label="@string/map"
+        tools:layout="@layout/fragment_maps" />
+</navigation>

@@ -3,13 +3,10 @@ package com.br.triatodetect.ui.camera
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Surface
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
-import com.br.triatodetect.ui.classify.ClassifyActivity
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils

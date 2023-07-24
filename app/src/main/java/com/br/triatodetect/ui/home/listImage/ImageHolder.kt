@@ -46,16 +46,10 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
 
     fun bindImage(image: Img) {
         imageObject = image
-        GlobalScope.launch {
-            try {
-                val bytes = Utils.retrieveImage(user!!, image)
-                if (bytes != null) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    imageImage.setImageBitmap(bitmap)
-                }
-            } catch (exception: Exception) {
-                // Lógica para lidar com a falha no download
-                Log.e("Download", "Error downloading image", exception)
+        Utils.retrieveImage(user!!, image) { bytes: ByteArray? ->
+            if (bytes != null) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imageImage.setImageBitmap(bitmap)
             }
         }
         imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
