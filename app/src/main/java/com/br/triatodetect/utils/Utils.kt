@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import android.location.Address
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Bundle
 import java.io.IOException
 import java.util.Locale
@@ -143,6 +144,14 @@ object Utils {
 
     fun setImageByteArray(image: Image, degrees: Int) {
         imageByteArray = processImage(image, degrees)
+    }
+
+    fun setUriByteArray(uri: Uri, context: Context) {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val bitmapUri: Bitmap = BitmapFactory.decodeStream(inputStream)
+        val outputStream = ByteArrayOutputStream()
+        bitmapUri.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        imageByteArray = outputStream.toByteArray()
     }
 
     fun getImageByteArray(): ByteArray? {

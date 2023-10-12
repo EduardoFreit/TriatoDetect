@@ -1,14 +1,18 @@
 package com.br.triatodetect.ui.camera
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.media.Image
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Surface
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -35,6 +39,13 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var sessionManager: SessionManager
     private var user: User? = null
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            Utils.setUriByteArray(it, applicationContext)
+            val intent = Intent(this@CameraActivity, ConfirmImageActivity::class.java)
+            startActivity(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +71,9 @@ class CameraActivity : AppCompatActivity() {
 
         binding.floatCloseCamera.setOnClickListener { closeCamera() }
 
-        binding.dlimit.rotation = 90f
-
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        binding.floatLoadImage.setOnClickListener { getContent.launch("image/*") }
     }
 
     private fun takePhoto() {
