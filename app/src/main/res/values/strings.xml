@@ -32,4 +32,6 @@
 
     <string name="confirm_image">Confirmar Imagem</string>
 
+    <string name="erro_proc_image">Erro ao Processar Imagem</string>
+
 </resources>

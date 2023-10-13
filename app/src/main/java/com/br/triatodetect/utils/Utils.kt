@@ -33,6 +33,8 @@ import android.location.Address
 import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
+import com.br.triatodetect.R
 import java.io.IOException
 import java.util.Locale
 
@@ -248,9 +250,12 @@ object Utils {
             result.add(classifications[0].categories[0].label.take(2))
             result.add(classifications[0].categories[0].score.toString())
             this.saveImageStores(bytes, user, context)
-        } else {
+        } else if(!classifications.isNullOrEmpty() && classifications[0].categories.isNullOrEmpty()) {
             result.add("un")
             result.add("1.0")
+            this.saveImageStores(bytes, user, context)
+        } else {
+            Toast.makeText(context, context.getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
         }
     }
 
