@@ -34,13 +34,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_marginBottom="30dp"
-        app:maxImageSize="40dp"
+        app:backgroundTint="@color/blue_200"
+        app:layout_constraintBottom_toTopOf="@+id/horizontal_endLine"
         app:layout_constraintEnd_toEndOf="@id/vertical_endLine"
         app:layout_constraintEnd_toStartOf="@id/vertical_endLine"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/horizontal_endLine"
+        app:maxImageSize="40dp"
         app:srcCompat="@drawable/baseline_image_24"
-        app:backgroundTint="@color/blue_200"
         app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -55,6 +55,8 @@
         app:fabCustomSize="80dp"
         app:maxImageSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/horizontal_endLine"
+        app:layout_constraintTop_toTopOf="@+id/horizontal_endLine"
         app:layout_constraintStart_toStartOf="@id/vertical_centerline"
         app:layout_constraintEnd_toEndOf="@id/vertical_centerline" />
 
@@ -71,6 +73,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent=".90" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/horizontal_endLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.92" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
