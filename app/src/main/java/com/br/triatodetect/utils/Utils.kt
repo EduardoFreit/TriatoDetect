@@ -244,10 +244,13 @@ object Utils {
 
         val classifications = imageClassifier?.classify(tensorImage, imageProcessingOptions)
 
-        if (!classifications.isNullOrEmpty()) {
-            result.add(classifications[0].categories[0].label)
+        if (!classifications.isNullOrEmpty() && !classifications[0].categories.isNullOrEmpty()) {
+            result.add(classifications[0].categories[0].label.take(2))
             result.add(classifications[0].categories[0].score.toString())
             this.saveImageStores(bytes, user, context)
+        } else {
+            result.add("un")
+            result.add("1.0")
         }
     }
 
