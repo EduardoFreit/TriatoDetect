@@ -14,7 +14,7 @@ import com.br.triatodetect.R
 import com.br.triatodetect.databinding.ActivityHomeBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.BaseActivity
-import com.br.triatodetect.ui.camera.CameraActivity
+import com.br.triatodetect.ui.camera.InstructionCameraActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -90,7 +90,7 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun openCamera() {
-        val intent = Intent(this, CameraActivity::class.java)
+        val intent = Intent(this, InstructionCameraActivity::class.java)
         startActivity(intent)
     }
 

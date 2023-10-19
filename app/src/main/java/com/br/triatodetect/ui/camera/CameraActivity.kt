@@ -29,6 +29,7 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
+import java.util.Objects
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -97,6 +98,11 @@ class CameraActivity : AppCompatActivity() {
             scaleGestureDetector.onTouchEvent(event)
             return@setOnTouchListener true
         }
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
     }
 
     private fun takePhoto() {

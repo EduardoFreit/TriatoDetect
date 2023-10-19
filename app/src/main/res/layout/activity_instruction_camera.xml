@@ -13,16 +13,17 @@
         android:id="@+id/instruction_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
         android:paddingHorizontal="10dp"
-        android:text="@string/instruction_picture">
-    </TextView>
+        android:textAlignment="textStart"
+        android:textStyle="bold"
+        android:text="@string/instruction_picture"
+        android:textSize="22dp"></TextView>
 
     <Button
         android:id="@+id/instruction_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="125dp"
         app:icon="@drawable/baseline_camera_alt_24"
         android:text="@string/instruction_button"
         ></Button>
