@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.icu.text.SimpleDateFormat
 import android.location.Location
 import android.media.Image
 import android.util.Log
@@ -33,10 +34,15 @@ import android.location.Address
 import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.widget.Toast
 import com.br.triatodetect.R
 import java.io.IOException
 import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
+import java.util.Date
 
 object Utils {
 
@@ -54,6 +60,7 @@ object Utils {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private const val reduceImage: Int = 4
     var args: Bundle? = null
+    private val functions = FirebaseFunctions.getInstance()
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -63,6 +70,7 @@ object Utils {
 
     private fun insertNewObject(obj: Any, collection: String) {
         storage.reference
+        FirebaseAuth.getInstance()
         db.collection(collection)
             .add(obj)
             .addOnSuccessListener { documentReference ->
@@ -205,6 +213,7 @@ object Utils {
                             result[1].toDouble()
                         )
                         this.insertNewObject(rowImage, "Images")
+                        this.sendEmailClassification(context, rowImage, image)
                     }
                 }
         }
@@ -299,6 +308,38 @@ object Utils {
             "$city - $state"
         } else {
             null
+        }
+    }
+
+    private fun sendEmailClassification(context: Context, rowImage: Img, image: ByteArray) {
+        if(!rowImage.label.equals("un")) {
+            val cidadeEstado =
+                rowImage.latitude?.let { latitude ->
+                    rowImage.longitude?.let { longitude ->
+                        this.getCityAndStateFromLocation(context,
+                            latitude, longitude
+                        )
+                    }
+                }
+            val horaData = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(rowImage.date)
+            val classify: String = when (rowImage.label) {
+                "tb" -> context.getString(R.string.tb)
+                "tp" -> context.getString(R.string.tp)
+                "pm" -> context.getString(R.string.pm)
+                "pl" -> context.getString(R.string.pl)
+                else -> context.getString(R.string.un)
+            }
+            val imageBase64 = Base64.encodeToString(image, Base64.DEFAULT)
+            val subject = "TriatoDetect - Novo Triatomíneo Identificado"
+            val text = "Foi identificado um triatomineo da espécie $classify. Localização: $cidadeEstado / Horário: $horaData"
+
+            val data = hashMapOf(
+                "subject" to subject,
+                "text" to text,
+                "imageBase64" to imageBase64
+            )
+
+            functions.getHttpsCallable("sendEmailWithAttachment").call(data)
         }
     }
 
