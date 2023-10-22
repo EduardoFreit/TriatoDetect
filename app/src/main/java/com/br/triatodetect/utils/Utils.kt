@@ -331,11 +331,12 @@ object Utils {
             }
             val imageBase64 = Base64.encodeToString(image, Base64.DEFAULT)
             val subject = "TriatoDetect - Novo Triatomíneo Identificado"
-            val text = "Foi identificado um triatomineo da espécie $classify. Localização: $cidadeEstado / Horário: $horaData"
+            val linkGoogleMap = "https://maps.google.com/?q=${rowImage.latitude},${rowImage.longitude}"
+            val html = "<p>Foi identificado um triatomineo da espécie <strong>$classify</strong>. Localização: <a href='$linkGoogleMap'>$cidadeEstado</a> / Horário: $horaData</p>"
 
             val data = hashMapOf(
                 "subject" to subject,
-                "text" to text,
+                "html" to html,
                 "imageBase64" to imageBase64
             )
 

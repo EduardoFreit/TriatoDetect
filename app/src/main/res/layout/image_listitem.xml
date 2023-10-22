@@ -36,6 +36,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:srcCompat="@tools:sample/avatars"
+                android:src="@drawable/solid_color_gray"
                 ></com.google.android.material.imageview.ShapeableImageView>
 
             <LinearLayout
@@ -56,7 +57,7 @@
                     android:shadowRadius="1"
                     android:layout_height="match_parent" />
                 <TextView
-                    android:id="@+id/image_status"
+                    android:id="@+id/image_local"
                     android:layout_weight="1"
                     android:textSize="6pt"
                     android:layout_width="wrap_content"

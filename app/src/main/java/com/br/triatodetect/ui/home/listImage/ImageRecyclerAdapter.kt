@@ -18,6 +18,13 @@ class ImageRecyclerAdapter(private val images: Array<Img>) : RecyclerView.Adapte
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {
         holder.bindImage(images[position])
     }
+    override fun getItemId(position: Int): Long {
+        return position.toLong();
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return position;
+    }
 
     override fun getItemCount(): Int {
         return images.size

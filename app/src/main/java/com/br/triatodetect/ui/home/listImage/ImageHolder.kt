@@ -18,7 +18,7 @@ import com.br.triatodetect.utils.Utils
 
 class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     private val imageDate: TextView
-    private val imageStatus: TextView
+    private val imageLocal: TextView
     private val imageClassify: TextView
     private val imageImage: ImageView
     private var user: User? = null
@@ -27,7 +27,7 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
 
     init {
         imageDate = itemView.findViewById(R.id.image_date)
-        imageStatus = itemView.findViewById(R.id.image_status)
+        imageLocal = itemView.findViewById(R.id.image_local)
         imageClassify = itemView.findViewById(R.id.image_classify)
         imageImage = itemView.findViewById(R.id.image_image)
         val sessionManager = SessionManager.getInstance(itemView.context)
@@ -51,13 +51,15 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
         }
         imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
 
-        val textStatus: String = when (image.status) {
-            StatusImage.PENDENTE -> itemView.context.getString(R.string.pendente).trim().uppercase()
-            StatusImage.AGUARDANDO_CONFIRMACAO -> itemView.context.getString(R.string.aguardando_confirmacao).trim().uppercase()
-            StatusImage.FINALIZADO -> itemView.context.getString(R.string.finalizado).trim().uppercase()
+        image.latitude?.let { latitude ->
+            image.longitude?.let { longitude ->
+                imageLocal.text = Utils.getCityAndStateFromLocation(
+                    itemView.context,
+                    latitude,
+                    longitude
+                )
+            }
         }
-
-        imageStatus.text = textStatus
 
         val textClassify: String = when (image.label) {
             "tb" -> itemView.context.getString(R.string.tb)

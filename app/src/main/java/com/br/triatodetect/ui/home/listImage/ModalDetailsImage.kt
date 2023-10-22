@@ -28,7 +28,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class ModalDetailsImage(private val image: Img?, private val user: User?, private val bitmap: Bitmap?) : BottomSheetDialogFragment() {
 
-    private lateinit var imageStatus: TextView
+    private lateinit var imageDate: TextView
     private lateinit var imageClassify: TextView
     private lateinit var imageImage: ImageView
     private lateinit var imageLocalization: TextView
@@ -62,13 +62,9 @@ class ModalDetailsImage(private val image: Img?, private val user: User?, privat
             else -> ContextCompat.getColor(view.context, R.color.un)
         }
 
-        val textStatus: String = when (image.status) {
-            StatusImage.PENDENTE -> getString(R.string.pendente).trim().uppercase()
-            StatusImage.AGUARDANDO_CONFIRMACAO -> getString(R.string.aguardando_confirmacao).trim().uppercase()
-            StatusImage.FINALIZADO -> getString(R.string.finalizado).trim().uppercase()
-        }
+        val textDate: String = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
 
-        imageStatus = view.findViewById(R.id.image_status)
+        imageDate = view.findViewById(R.id.image_date)
         imageClassify = view.findViewById(R.id.image_classify)
 
         imageImage = view.findViewById(R.id.image_image)
@@ -78,27 +74,18 @@ class ModalDetailsImage(private val image: Img?, private val user: User?, privat
         imageClassify.paintFlags = imageClassify.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         imageClassify.setTextColor(colorClassify)
         imageLocalization.text =  Utils.getCityAndStateFromLocation(view.context, image.latitude!!, image.longitude!!)
-        imageStatus.text = textStatus
+        imageDate.text = textDate
         imageImage.setImageBitmap(bitmap)
 
         val bottomNavigationView: BottomNavigationView = requireActivity().findViewById(R.id.nav_view)
         val button: Button = view.findViewById(R.id.button_map)
         button.setOnClickListener {
             dismiss()
-            val textClassify: String = when (image.label) {
-                "tb" -> getString(R.string.tb)
-                "tp" -> getString(R.string.tp)
-                "pm" -> getString(R.string.pm)
-                "pl" -> getString(R.string.pl)
-                else -> getString(R.string.un)
-            }
-            val imageDate: String? = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
-
             Utils.args = Bundle()
             Utils.args!!.putDouble(MapsFragment.LATITUDE_IMAGE, image.latitude)
             Utils.args!!.putDouble(MapsFragment.LONGITUDE_IMAGE, image.longitude)
             Utils.args!!.putString(MapsFragment.CLASSIFY, textClassify)
-            Utils.args!!.putString(MapsFragment.DATE, imageDate)
+            Utils.args!!.putString(MapsFragment.DATE, textDate)
 
             val navController = requireActivity().findNavController(R.id.nav_host_fragment_activity_main)
             navController.popBackStack()
