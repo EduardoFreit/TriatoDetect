@@ -277,8 +277,8 @@ object Utils {
             val insectImagesRef: StorageReference = storageRef
                 .child("Images/${email}/${image.imageName}")
 
-            val ONE_MEGABYTE: Long = 1024 * 1024
-            insectImagesRef.getBytes(ONE_MEGABYTE)
+            val oneMegabyteMax: Long = 1024 * 1024
+            insectImagesRef.getBytes(oneMegabyteMax)
                 .addOnSuccessListener { bytes ->
                     callback(bytes)
                 }

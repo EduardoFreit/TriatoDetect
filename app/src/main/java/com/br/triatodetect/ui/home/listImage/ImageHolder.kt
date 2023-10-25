@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
-import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
@@ -51,15 +50,11 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
         }
         imageDate.text = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
 
-        image.latitude?.let { latitude ->
-            image.longitude?.let { longitude ->
-                imageLocal.text = Utils.getCityAndStateFromLocation(
-                    itemView.context,
-                    latitude,
-                    longitude
-                )
-            }
-        }
+        imageLocal.text = Utils.getCityAndStateFromLocation(
+            itemView.context,
+            image.latitude!!,
+            image.longitude!!
+        )
 
         val textClassify: String = when (image.label) {
             "tb" -> itemView.context.getString(R.string.tb)
