@@ -29,10 +29,8 @@ import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
-import java.util.Objects
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
 
 class CameraActivity : AppCompatActivity() {
 
@@ -42,13 +40,6 @@ class CameraActivity : AppCompatActivity() {
     private var camera: Camera? = null
     private lateinit var sessionManager: SessionManager
     private var user: User? = null
-    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            Utils.setUriByteArray(it, applicationContext)
-            val intent = Intent(this@CameraActivity, ConfirmImageActivity::class.java)
-            startActivity(intent)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +67,6 @@ class CameraActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        binding.floatLoadImage.setOnClickListener { getContent.launch("image/*") }
     }
 
     @SuppressLint("ClickableViewAccessibility")

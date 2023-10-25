@@ -16,16 +16,35 @@
         android:paddingHorizontal="10dp"
         android:textAlignment="textStart"
         android:textStyle="bold"
+        android:layout_marginTop="125dp"
         android:text="@string/instruction_picture"
         android:textSize="22dp"></TextView>
 
-    <Button
-        android:id="@+id/instruction_button"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_marginTop="125dp"
-        app:icon="@drawable/baseline_camera_alt_24"
-        android:text="@string/instruction_button"
-        ></Button>
+        android:gravity="center">
+        <Button
+            android:id="@+id/instruction_button_foto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/baseline_camera_alt_24"
+            android:layout_marginHorizontal="24dp"
+            android:text="@string/instruction_button_foto"
+            ></Button>
+
+        <Button
+            android:id="@+id/instruction_button_imagem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/baseline_image_24"
+            android:layout_marginHorizontal="24dp"
+            android:text="@string/instruction_button_imagem"
+            ></Button>
+    </LinearLayout>
+
+
 
 </LinearLayout>

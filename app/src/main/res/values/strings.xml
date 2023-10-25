@@ -34,5 +34,7 @@
 
     <string name="erro_proc_image">Erro ao Processar Imagem</string>
     <string name="instruction_title">Instruções</string>
+    <string name="instruction_button_imagem">Imagem</string>
+    <string name="instruction_button_foto">Foto</string>
 
 </resources>

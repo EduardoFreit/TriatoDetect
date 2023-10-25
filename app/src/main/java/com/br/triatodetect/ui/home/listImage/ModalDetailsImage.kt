@@ -97,8 +97,8 @@ class ModalDetailsImage(private val image: Img?, private val user: User?, privat
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
 
-        dialog.setOnShowListener { dialog ->
-            val d = dialog as BottomSheetDialog
+        dialog.setOnShowListener {
+            val d = it as BottomSheetDialog
             val bottomSheet = d.findViewById<View>(R.id.standard_bottom_sheet) as LinearLayout?
             BottomSheetBehavior.from(bottomSheet!!).state = BottomSheetBehavior.STATE_EXPANDED
         }

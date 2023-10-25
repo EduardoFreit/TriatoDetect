@@ -30,20 +30,6 @@
         app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/float_load_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        app:backgroundTint="@color/blue_200"
-        app:layout_constraintBottom_toTopOf="@+id/horizontal_endLine"
-        app:layout_constraintEnd_toEndOf="@id/vertical_endLine"
-        app:layout_constraintEnd_toStartOf="@id/vertical_endLine"
-        app:layout_constraintTop_toTopOf="@+id/horizontal_endLine"
-        app:maxImageSize="40dp"
-        app:srcCompat="@drawable/baseline_image_24"
-        app:tint="@color/white" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/float_button_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

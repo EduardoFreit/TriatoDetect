@@ -8,6 +8,7 @@ class ListImageViewModelFactory(private val user: User) : ViewModelProvider.Fact
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ListImageViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
             return ListImageViewModel(user) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

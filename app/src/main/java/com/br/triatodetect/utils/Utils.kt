@@ -5,7 +5,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.icu.text.SimpleDateFormat
 import android.location.Location
 import android.media.Image
@@ -41,8 +45,6 @@ import java.io.IOException
 import java.util.Locale
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.FirebaseFunctionsException
-import java.util.Date
 
 object Utils {
 
@@ -58,7 +60,6 @@ object Utils {
     private var imageByteArray: ByteArray? = null
     var result: MutableList<String> = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private const val reduceImage: Int = 4
     var args: Bundle? = null
     private val functions = FirebaseFunctions.getInstance()
     fun checkPermission(context: Context, permission: String): Boolean {
@@ -119,17 +120,15 @@ object Utils {
 
     private fun rotateByteArrayImage(
         imageData: ByteArray,
-        degrees: Int,
-        width: Int,
-        height: Int
+        degrees: Int
     ): ByteArray {
         // Convert ByteArray to Bitmap
         var bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
         //Reduzir resolução da imagem - (melhorar desempenho)
         bitmap = Bitmap.createScaledBitmap(
             bitmap,
-            width / reduceImage,
-            height / reduceImage,
+            640,
+            640,
             true
         )
         // Perform rotation on the Bitmap
@@ -149,11 +148,11 @@ object Utils {
         val buffer: ByteBuffer = image.planes[0].buffer
         var bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return rotateByteArrayImage(bytes, degrees, image.width, image.height)
+        return this.rotateByteArrayImage(bytes, degrees)
     }
 
     fun setImageByteArray(image: Image, degrees: Int) {
-        imageByteArray = processImage(image, degrees)
+        imageByteArray = this.processImage(image, degrees)
     }
 
     fun setUriByteArray(uri: Uri, context: Context) {
@@ -161,7 +160,7 @@ object Utils {
         val bitmapUri: Bitmap = BitmapFactory.decodeStream(inputStream)
         val outputStream = ByteArrayOutputStream()
         bitmapUri.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        imageByteArray = outputStream.toByteArray()
+        imageByteArray = this.rotateByteArrayImage(outputStream.toByteArray(), 0)
     }
 
     fun getImageByteArray(): ByteArray? {
@@ -243,7 +242,11 @@ object Utils {
         if (imageClassifier == null) {
             setupImageClassifier(context)
         }
-        val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+        val byteArrayGrey = this.imageByteArrayGrey(bytes,
+            -20f,1.55f)
+
+        val bitmap: Bitmap = BitmapFactory.decodeByteArray(byteArrayGrey, 0, byteArrayGrey.size)
 
         val imageProcessor =
             ImageProcessor.Builder()
@@ -279,12 +282,14 @@ object Utils {
                 .addOnSuccessListener { bytes ->
                     callback(bytes)
                 }
-                .addOnFailureListener { exception ->
+                .addOnFailureListener { _ ->
                     callback(null)
                 }
         }
     }
 
+
+    @Suppress("DEPRECATION")
     fun getCityAndStateFromLocation(context: Context, latitude: Double, longitude: Double): String? {
         val geocoder = Geocoder(context, Locale.getDefault())
         var city = ""
@@ -295,7 +300,7 @@ object Utils {
             if (!addresses.isNullOrEmpty()) {
                 val address = addresses[0]
                 city = address.locality ?: ""
-                if(city.isNullOrBlank()) {
+                if(city.isBlank()) {
                     city = address.subAdminArea ?: ""
                 }
                 state = address.adminArea ?: ""
@@ -342,6 +347,44 @@ object Utils {
 
             functions.getHttpsCallable("sendEmailWithAttachment").call(data)
         }
+    }
+
+    private fun imageByteArrayGrey(byteArray: ByteArray, brightness: Float, contrast: Float): ByteArray {
+        val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+        val adjustedBitmap = imageBitmapGrey(originalBitmap, brightness, contrast)
+
+        val outputStream = ByteArrayOutputStream()
+        adjustedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        val adjustedByteArray = outputStream.toByteArray()
+
+        originalBitmap.recycle()
+        adjustedBitmap.recycle()
+
+        return adjustedByteArray
+    }
+
+    private fun imageBitmapGrey(bitmap: Bitmap, brightness: Float, contrast: Float): Bitmap {
+        val colorMatrix = ColorMatrix(
+            floatArrayOf(
+                contrast, 0.0f, 0f, 0f, brightness,
+                0.0f, contrast, 0f, 0f, brightness,
+                0.0f, 0.0f, contrast, 0f, brightness,
+                0f, 0f, 0f, 1f, 0f
+            )
+        )
+        val adjustedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
+        val canvas = Canvas(adjustedBitmap)
+        val paint = Paint()
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+        canvas.drawBitmap(bitmap, 0.0f, 0.0f, paint)
+
+        colorMatrix.setSaturation(0f)
+        val colorMatrixFilter = ColorMatrixColorFilter(colorMatrix)
+        paint.colorFilter = colorMatrixFilter
+        canvas.drawBitmap(adjustedBitmap, 0f, 0f, paint)
+
+        return adjustedBitmap
     }
 
 }
