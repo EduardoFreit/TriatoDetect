@@ -1,10 +1,15 @@
 package com.br.triatodetect.ui.camera
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ProgressBar
+import android.widget.Toast
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
@@ -44,16 +49,29 @@ class ConfirmImageActivity : AppCompatActivity() {
 
     private fun processImage() {
         image?.let {
-            Utils.classify(this, it, user)
-            val intent = Intent(this@ConfirmImageActivity, HomeActivity::class.java)
-            startActivity(intent)
-            finish()
+            val progressBar = Utils.showLoading(
+                this,
+                binding.layout,
+                listOf(
+                    binding.floatButtonAccept,
+                    binding.floatButtonCancel
+                )
+            )
+            Utils.classify(this, it, user) { success: Boolean ->
+                Utils.hideLoading(progressBar, binding.layout, listOf())
+                if(!success) {
+                    Toast.makeText(this, getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
+                }
+                val intent = Intent(this@ConfirmImageActivity, HomeActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
     }
 
     private fun cancelImage() {
         Utils.resetImageByteArray()
-        val intent = Intent(this, CameraActivity::class.java)
+        val intent = Intent(this, InstructionCameraActivity::class.java)
         startActivity(intent)
         finish()
     }

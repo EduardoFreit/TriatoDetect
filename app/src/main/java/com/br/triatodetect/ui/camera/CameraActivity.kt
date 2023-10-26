@@ -115,7 +115,7 @@ class CameraActivity : AppCompatActivity() {
         )
     }
     private fun closeCamera() {
-        val intent = Intent(this, HomeActivity::class.java)
+        val intent = Intent(this, InstructionCameraActivity::class.java)
         startActivity(intent)
     }
 

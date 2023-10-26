@@ -11,18 +11,30 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.icu.text.SimpleDateFormat
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.media.Image
+import android.net.Uri
+import android.os.Bundle
+import android.util.Base64
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
@@ -33,18 +45,9 @@ import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import android.location.Address
-import android.location.Geocoder
-import android.net.Uri
-import android.os.Bundle
-import android.util.Base64
-import android.widget.Toast
-import com.br.triatodetect.R
 import java.io.IOException
+import java.nio.ByteBuffer
 import java.util.Locale
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.functions.FirebaseFunctions
 
 object Utils {
 
@@ -69,16 +72,18 @@ object Utils {
         ) != PackageManager.PERMISSION_GRANTED
     }
 
-    private fun insertNewObject(obj: Any, collection: String) {
+    private fun insertNewObject(obj: Any, collection: String, callback: (Boolean) -> Unit) {
         storage.reference
         FirebaseAuth.getInstance()
         db.collection(collection)
             .add(obj)
             .addOnSuccessListener { documentReference ->
+                callback(true)
                 Log.d("Insert", "DocumentSnapshot added with ID: ${documentReference.id}")
             }
             .addOnFailureListener { e ->
-                Log.e("Insert", "Error adding document", e)
+                callback(false)
+                Log.e("Insert", "Error adding image", e)
             }
     }
 
@@ -146,7 +151,7 @@ object Utils {
 
     private fun processImage(image: Image, degrees: Int): ByteArray {
         val buffer: ByteBuffer = image.planes[0].buffer
-        var bytes = ByteArray(buffer.remaining())
+        val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         return this.rotateByteArrayImage(bytes, degrees)
     }
@@ -171,25 +176,7 @@ object Utils {
         imageByteArray = null
     }
 
-    private fun saveImageStores(image: ByteArray, user: User?, context: Context) {
-        val currentTime: String = System.currentTimeMillis().toString()
-        val imageName = "${currentTime}${IMAGE_EXTENSION}"
-
-        //salvando imagem no CloudStore
-        user?.email?.let { email: String ->
-            storageRef = storage.reference
-            val insectImagesRef: StorageReference = storageRef
-                .child("Images/${email}/${imageName}")
-
-            var uploadTask: UploadTask = insectImagesRef.putBytes(image)
-            uploadTask.addOnFailureListener { e ->
-                Log.e("Insert", "Error adding image", e)
-            }.addOnSuccessListener { taskSnapshot ->
-                taskSnapshot.metadata?.reference
-                Log.d("Insert", "Image added with referece: ${taskSnapshot.metadata?.reference}")
-            }
-        }
-
+    private fun saveImageFirestore(image: ByteArray, user: User?, imageName: String, context: Context, callback: (Boolean) -> Unit) {
         //Salvando imagem no Firestore(DB)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (!(ActivityCompat.checkSelfPermission(
@@ -211,11 +198,50 @@ object Utils {
                             result[0],
                             result[1].toDouble()
                         )
-                        this.insertNewObject(rowImage, "Images")
-                        this.sendEmailClassification(context, rowImage, image)
+                        this.insertNewObject(rowImage, "Images") { result ->
+                            if(result) {
+                                this.sendEmailClassification(context, rowImage, image)
+                            }
+                            callback(result)
+                        }
+                    } else {
+                        callback(false)
+                        Log.e("Insert", "User location not identified")
                     }
+                }.addOnFailureListener { e ->
+                    callback(false)
+                    Log.e("Insert", "Error adding image", e)
                 }
         }
+    }
+
+    private fun saveImageStores(image: ByteArray, user: User?, context: Context, callback: (Boolean) -> Unit) {
+        val currentTime: String = System.currentTimeMillis().toString()
+        val imageName = "${currentTime}${IMAGE_EXTENSION}"
+
+        //salvando imagem no CloudStore
+        user?.email?.let { email: String ->
+            storageRef = storage.reference
+            val insectImagesRef: StorageReference = storageRef
+                .child("Images/${email}/${imageName}")
+
+            val uploadTask: UploadTask = insectImagesRef.putBytes(image)
+            uploadTask.addOnFailureListener { e ->
+                callback(false)
+                Log.e("Insert", "Error adding image", e)
+            }.addOnSuccessListener { taskSnapshot ->
+                taskSnapshot.metadata?.reference
+                Log.d("Insert", "Image added with referece: ${taskSnapshot.metadata?.reference}")
+                this.saveImageFirestore(image, user, imageName, context) { result ->
+                    if(!result) {
+                        val storageReference = taskSnapshot.metadata?.reference
+                        storageReference?.delete()
+                    }
+                    callback(result)
+                }
+            }
+        }
+
     }
 
     private fun setupImageClassifier(context: Context) {
@@ -237,7 +263,7 @@ object Utils {
         }
     }
 
-    fun classify(context: Context, bytes: ByteArray, user: User?) {
+    fun classify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
         result.clear()
         if (imageClassifier == null) {
             setupImageClassifier(context)
@@ -261,13 +287,17 @@ object Utils {
         if (!classifications.isNullOrEmpty() && !classifications[0].categories.isNullOrEmpty()) {
             result.add(classifications[0].categories[0].label.take(2))
             result.add(classifications[0].categories[0].score.toString())
-            this.saveImageStores(bytes, user, context)
+            this.saveImageStores(bytes, user, context) { result ->
+                callback(result)
+            }
         } else if(!classifications.isNullOrEmpty() && classifications[0].categories.isNullOrEmpty()) {
             result.add("un")
             result.add("1.0")
-            this.saveImageStores(bytes, user, context)
+            this.saveImageStores(bytes, user, context) { result ->
+                callback(result)
+            }
         } else {
-            Toast.makeText(context, context.getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
+            callback(false)
         }
     }
 
@@ -346,6 +376,11 @@ object Utils {
             )
 
             functions.getHttpsCallable("sendEmailWithAttachment").call(data)
+            .addOnFailureListener {
+                Log.e("Email", "Email not sent")
+            }.addOnSuccessListener {
+                Log.i("Email", "Email successfully sent")
+            }
         }
     }
 
@@ -385,6 +420,38 @@ object Utils {
         canvas.drawBitmap(adjustedBitmap, 0f, 0f, paint)
 
         return adjustedBitmap
+    }
+
+    fun showLoading(context: Context, layout: ViewGroup, hideViews: List<View>): ProgressBar {
+        val progressBar = ProgressBar(context)
+        progressBar.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+
+        // Define o padding horizontal em pixels (150dp)
+        val paddingInDp = 150f
+        val scale = context.resources.displayMetrics.density
+        val paddingInPixels = (paddingInDp * scale + 0.5f).toInt()
+        progressBar.setPadding(paddingInPixels, 0, paddingInPixels, 0)
+
+        progressBar.setBackgroundResource(R.drawable.loading)
+        progressBar.elevation = 4f
+
+        layout.addView(progressBar)
+
+        hideViews.forEach { view: View ->
+            view.visibility  = View.GONE
+        }
+
+        return progressBar
+    }
+
+    fun hideLoading(progressBar: ProgressBar, layout: ViewGroup, showViews: List<View>) {
+        showViews.forEach { view: View ->
+            view.visibility  = View.VISIBLE
+        }
+        layout.removeView(progressBar)
     }
 
 }
