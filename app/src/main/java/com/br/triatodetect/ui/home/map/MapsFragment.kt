@@ -76,19 +76,15 @@ class MapsFragment : Fragment() {
                         val localization = LatLng(image.latitude!!, image.longitude!!)
 
                         val textClassify: String = when (image.label) {
-                            "tb" -> getString(R.string.tb)
-                            "tp" -> getString(R.string.tp)
-                            "pm" -> getString(R.string.pm)
-                            "pl" -> getString(R.string.pl)
-                            else -> getString(R.string.un)
+                            "n" -> getString(R.string.n)
+                            "s" -> getString(R.string.s)
+                            else -> getString(R.string.u)
                         }
 
                         val colorClassify: String = when (image.label) {
-                            "tb" -> this.colorToHex(binding.root.context, R.color.tb)
-                            "tp" -> this.colorToHex(binding.root.context, R.color.tp)
-                            "pm" -> this.colorToHex(binding.root.context, R.color.pm)
-                            "pl" -> this.colorToHex(binding.root.context, R.color.pl)
-                            else -> this.colorToHex(binding.root.context, R.color.un)
+                            "n" -> this.colorToHex(binding.root.context, R.color.n)
+                            "s" -> this.colorToHex(binding.root.context, R.color.s)
+                            else -> this.colorToHex(binding.root.context, R.color.u)
                         }
 
                         val imageDate: String? = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)

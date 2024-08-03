@@ -57,12 +57,9 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
         )
 
         val textClassify: String = when (image.label) {
-            "tb" -> itemView.context.getString(R.string.tb)
-            "tp" -> itemView.context.getString(R.string.tp)
-            "pm" -> itemView.context.getString(R.string.pm)
-            "pl" -> itemView.context.getString(R.string.pl)
-            "un" -> itemView.context.getString(R.string.un)
-            else -> itemView.context.getString(R.string.un)
+            "n" -> itemView.context.getString(R.string.n)
+            "s" -> itemView.context.getString(R.string.s)
+            else -> itemView.context.getString(R.string.u)
         }
 
         imageClassify.text = textClassify

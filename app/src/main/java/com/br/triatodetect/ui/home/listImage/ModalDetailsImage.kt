@@ -47,19 +47,15 @@ class ModalDetailsImage(private val image: Img?, private val user: User?, privat
     private fun renderModalContent() {
 
         val textClassify: String = when (image!!.label) {
-            "tb" -> getString(R.string.tb)
-            "tp" -> getString(R.string.tp)
-            "pm" -> getString(R.string.pm)
-            "pl" -> getString(R.string.pl)
-            else -> getString(R.string.un)
+            "n" -> getString(R.string.n)
+            "s" -> getString(R.string.s)
+            else -> getString(R.string.u)
         }
 
         val colorClassify: Int = when (image.label) {
-            "tb" -> ContextCompat.getColor(view.context, R.color.tb)
-            "tp" -> ContextCompat.getColor(view.context, R.color.tp)
-            "pm" -> ContextCompat.getColor(view.context, R.color.pm)
-            "pl" -> ContextCompat.getColor(view.context, R.color.pl)
-            else -> ContextCompat.getColor(view.context, R.color.un)
+            "n" -> ContextCompat.getColor(view.context, R.color.n)
+            "s" -> ContextCompat.getColor(view.context, R.color.s)
+            else -> ContextCompat.getColor(view.context, R.color.u)
         }
 
         val textDate: String = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
