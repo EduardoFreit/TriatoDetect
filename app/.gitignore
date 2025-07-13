@@ -1,1 +1,3 @@
 /build
+google-services.json
+src/main/assets/model/model_detection_triatominies_float32.tflite
