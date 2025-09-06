@@ -60,7 +60,7 @@ object Utils {
     private val functions = FirebaseFunctions.getInstance()
     private const val THRESHOLD: Float = 0.7f
     private const val LOWER_THRESHOLD: Float = 0.4f
-    private const val UPPER_THRESHOLD: Float = 0.6f
+    private const val UPPER_THRESHOLD: Float = 0.75f
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -260,7 +260,7 @@ object Utils {
 
 
         if (prediction < LOWER_THRESHOLD) {
-            result.add("n")      // classe negativa
+            result.add("u")      // classe negativa
         } else if (prediction > UPPER_THRESHOLD) {
             result.add("s")      // classe positiva
         } else {
