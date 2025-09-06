@@ -44,6 +44,7 @@ import org.tensorflow.lite.Interpreter;
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import androidx.core.graphics.get
 
 object Utils {
 
@@ -60,6 +61,8 @@ object Utils {
     private const val IMAGE_SIZE = 224
     private const val IMAGE_RESIZE = 224
     private const val THRESHOLD: Float = 0.7f
+    private const val LOWER_THRESHOLD: Float = 0.4f
+    private const val UPPER_THRESHOLD: Float = 0.6f
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -106,12 +109,6 @@ object Utils {
         degrees: Int
     ): ByteArray {
         var bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
-        bitmap = Bitmap.createScaledBitmap(
-            bitmap,
-            IMAGE_SIZE,
-            IMAGE_SIZE,
-            true
-        )
 
         val matrix = Matrix()
         matrix.postRotate(degrees.toFloat())
@@ -230,8 +227,7 @@ object Utils {
     }
 
 
-    @Throws(Exception::class)
-    private fun classify(context: Context, bitmap: Bitmap) {
+    private fun classifyMultiClass(context: Context, bitmap: Bitmap) {
         val model = loadModelFile(context)
         val input = preProcessImageClassify(bitmap)
         val interpreter = Interpreter(model)
@@ -254,36 +250,52 @@ object Utils {
         }
         result.add(maxValue.toString())
     }
+
+    private fun classifyBinary(context: Context, bitmap: Bitmap) {
+        val model = loadModelFile(context)
+        val input = preProcessImageClassify(bitmap)
+        val interpreter = Interpreter(model)
+        val output = Array(1) { FloatArray(1) } // saída binária (sigmoid)
+
+        interpreter.run(input, output)
+        val prediction = output[0][0] // valor entre 0 e 1 do sigmoid
+
+
+        if (prediction < LOWER_THRESHOLD) {
+            result.add("n")      // classe negativa
+        } else if (prediction > UPPER_THRESHOLD) {
+            result.add("s")      // classe positiva
+        } else {
+            result.add("u")      // indefinido
+        }
+
+        result.add(prediction.toString())
+    }
+
+
     private fun preProcessImageClassify(bitmap: Bitmap): Array<Array<Array<FloatArray>>> {
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, IMAGE_RESIZE, IMAGE_RESIZE, true)
-        val input = Array(1) { Array(IMAGE_RESIZE) { Array(IMAGE_RESIZE) { FloatArray(3) } } }
+        val width = bitmap.width
+        val height = bitmap.height
+        val input = Array(1) { Array(height) { Array(width) { FloatArray(3) } } }
 
-        for (i in 0 until IMAGE_RESIZE) {
-            for (j in 0 until IMAGE_RESIZE) {
-                val pixel = scaledBitmap.getPixel(i, j)
-                val red = Color.red(pixel)
-                val green = Color.green(pixel)
-                val blue = Color.blue(pixel)
-
-                val grayscaleValue = (red + green + blue) / 3.0f
-
-                input[0][i][j][0] = grayscaleValue
-                input[0][i][j][1] = grayscaleValue
-                input[0][i][j][2] = grayscaleValue
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                val pixel = bitmap[j, i] // notar: x=j, y=i
+                input[0][i][j][0] = Color.red(pixel) / 255.0f
+                input[0][i][j][1] = Color.green(pixel) / 255.0f
+                input[0][i][j][2] = Color.blue(pixel) / 255.0f
             }
         }
         return input
     }
 
-
-    fun classify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
+    fun initClassify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
         try {
             result.clear()
 
             val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
-            classify(context, bitmap)
-
+            classifyBinary(context, bitmap)
 
             callback(true)
             this.saveImageStores(bytes, user, context) { result ->

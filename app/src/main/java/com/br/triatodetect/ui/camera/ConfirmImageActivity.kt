@@ -1,14 +1,10 @@
 package com.br.triatodetect.ui.camera
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
@@ -57,7 +53,7 @@ class ConfirmImageActivity : AppCompatActivity() {
                     binding.floatButtonCancel
                 )
             )
-            Utils.classify(this, it, user) { success: Boolean ->
+            Utils.initClassify(this, it, user) { success: Boolean ->
                 Utils.hideLoading(progressBar, binding.layout, listOf())
                 if(!success) {
                     Toast.makeText(this, getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
