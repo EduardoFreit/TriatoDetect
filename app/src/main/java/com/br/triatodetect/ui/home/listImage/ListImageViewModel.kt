@@ -21,4 +21,8 @@ class ListImageViewModel(private val user: User) : ViewModel() {
             _listImage.value = listImages
         }
     }
+
+    fun refreshListImages() {
+        loadListImages()
+    }
 }

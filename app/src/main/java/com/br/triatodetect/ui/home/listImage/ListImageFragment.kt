@@ -17,6 +17,7 @@ class ListImageFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
     private var user: User? = null
     private lateinit var adapter: ImageRecyclerAdapter
+    private lateinit var listImageViewModel: ListImageViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,7 +32,7 @@ class ListImageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val listImageViewModelFactory = ListImageViewModelFactory(user!!)
-        val listImageViewModel =
+        listImageViewModel =
             ViewModelProvider(this, listImageViewModelFactory)[ListImageViewModel::class.java]
 
         // Inicializa o adapter
@@ -39,9 +40,24 @@ class ListImageFragment : Fragment() {
         binding.listView.layoutManager = LinearLayoutManager(binding.root.context)
         binding.listView.adapter = adapter
 
-        // Observa LiveData e adiciona novas imagens sem duplicar
+        // Observa LiveData e atualiza a lista de imagens
         listImageViewModel.listImage.observe(viewLifecycleOwner) { newList ->
-            adapter.updateData(newList)
+            // No primeiro carregamento, usa updateData para eficiência
+            // Em refreshs subsequentes, usa refreshData para garantir ordem correta
+            if (adapter.itemCount == 0) {
+                adapter.updateData(newList)
+            } else {
+                adapter.refreshData(newList)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Recarrega a lista quando o fragmento volta a ser visível
+        // Isso garante que novas imagens sejam mostradas quando o usuário retorna da captura
+        if (::listImageViewModel.isInitialized) {
+            listImageViewModel.refreshListImages()
         }
     }
 

@@ -44,6 +44,10 @@ import org.tensorflow.lite.Interpreter;
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.core.graphics.get
 
 object Utils {
@@ -278,7 +282,7 @@ object Utils {
 
         for (i in 0 until height) {
             for (j in 0 until width) {
-                val pixel = bitmap[j, i] // notar: x=j, y=i
+                val pixel = bitmap[j, i]
                 input[0][i][j][0] = Color.red(pixel) / 255.0f
                 input[0][i][j][1] = Color.green(pixel) / 255.0f
                 input[0][i][j][2] = Color.blue(pixel) / 255.0f
@@ -288,21 +292,30 @@ object Utils {
     }
 
     fun initClassify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
-        try {
-            result.clear()
+        // Executa a classificação em uma thread de background
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                result.clear()
 
-            val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
-            classifyBinary(context, bitmap)
+                // Classificação executada em background thread
+                classifyBinary(context, bitmap)
 
-            callback(true)
-            this.saveImageStores(bytes, user, context) { result ->
-                callback(result)
+                // Volta para a main thread para executar operações de UI e Firebase
+                withContext(Dispatchers.Main) {
+                    saveImageStores(bytes, user, context) { result ->
+                        callback(result)
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Volta para a main thread para executar o callback
+                withContext(Dispatchers.Main) {
+                    callback(false)
+                }
             }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            callback(false)
         }
     }
 

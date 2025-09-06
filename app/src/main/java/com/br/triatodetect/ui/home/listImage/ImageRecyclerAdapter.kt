@@ -23,8 +23,16 @@ class ImageRecyclerAdapter(private val images: MutableList<Img> = mutableListOf(
 
     // Atualiza a lista sem duplicatas
     fun updateData(newImages: Array<Img>) {
+        // Se a lista estiver vazia, adiciona todas as imagens
+        if (images.isEmpty()) {
+            images.addAll(newImages)
+            notifyDataSetChanged()
+            return
+        }
+
+        // Verifica se há novas imagens
         val uniqueNewImages = newImages.filter { newImg ->
-            images.none { it.imageName == newImg.imageName } // assumindo que Img tem um id único
+            images.none { it.imageName == newImg.imageName }
         }
 
         if (uniqueNewImages.isNotEmpty()) {
@@ -32,5 +40,12 @@ class ImageRecyclerAdapter(private val images: MutableList<Img> = mutableListOf(
             images.addAll(uniqueNewImages)
             notifyItemRangeInserted(startPos, uniqueNewImages.size)
         }
+    }
+
+    // Substitui completamente a lista (usado para refresh)
+    fun refreshData(newImages: Array<Img>) {
+        images.clear()
+        images.addAll(newImages)
+        notifyDataSetChanged()
     }
 }
