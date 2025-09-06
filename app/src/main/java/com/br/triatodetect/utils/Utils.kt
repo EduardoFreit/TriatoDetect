@@ -58,8 +58,6 @@ object Utils {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var args: Bundle? = null
     private val functions = FirebaseFunctions.getInstance()
-    private const val IMAGE_SIZE = 224
-    private const val IMAGE_RESIZE = 224
     private const val THRESHOLD: Float = 0.7f
     private const val LOWER_THRESHOLD: Float = 0.4f
     private const val UPPER_THRESHOLD: Float = 0.6f
