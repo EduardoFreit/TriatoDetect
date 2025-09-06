@@ -49,6 +49,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.get
+import androidx.core.graphics.scale
 
 object Utils {
 
@@ -65,6 +66,9 @@ object Utils {
     private const val THRESHOLD: Float = 0.7f
     private const val LOWER_THRESHOLD: Float = 0.4f
     private const val UPPER_THRESHOLD: Float = 0.75f
+    private const val IMAGE_RESIZE: Int = 224
+    private const val IMAGE_SAVE_SIZE: Int = 800 // Tamanho para salvar (menor que o original)
+    private const val IMAGE_QUALITY: Int = 75 // Qualidade de compressão (0-100)
     fun checkPermission(context: Context, permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -106,6 +110,33 @@ object Utils {
             }
     }
 
+    private fun resizeAndCompressImage(bitmap: Bitmap): ByteArray {
+        // Calcula o novo tamanho mantendo a proporção
+        val originalWidth = bitmap.width
+        val originalHeight = bitmap.height
+        val aspectRatio = originalWidth.toFloat() / originalHeight.toFloat()
+        
+        val newWidth: Int
+        val newHeight: Int
+        
+        if (originalWidth > originalHeight) {
+            newWidth = IMAGE_SAVE_SIZE
+            newHeight = (IMAGE_SAVE_SIZE / aspectRatio).toInt()
+        } else {
+            newHeight = IMAGE_SAVE_SIZE
+            newWidth = (IMAGE_SAVE_SIZE * aspectRatio).toInt()
+        }
+        
+        // Redimensiona a imagem
+        val resizedBitmap = bitmap.scale(newWidth, newHeight, true)
+        
+        // Comprime a imagem
+        val outputStream = ByteArrayOutputStream()
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, outputStream)
+        
+        return outputStream.toByteArray()
+    }
+
     private fun rotateByteArrayImage(
         imageData: ByteArray,
         degrees: Int
@@ -118,7 +149,7 @@ object Utils {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
         val outputStream = ByteArrayOutputStream()
-        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, outputStream)
 
         return outputStream.toByteArray()
     }
@@ -137,9 +168,9 @@ object Utils {
     fun setUriByteArray(uri: Uri, context: Context) {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bitmapUri: Bitmap = BitmapFactory.decodeStream(inputStream)
-        val outputStream = ByteArrayOutputStream()
-        bitmapUri.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        imageByteArray = this.rotateByteArrayImage(outputStream.toByteArray(), 0)
+        
+        // Redimensiona e comprime a imagem antes de armazenar
+        imageByteArray = resizeAndCompressImage(bitmapUri)
     }
 
     fun getImageByteArray(): ByteArray? {
@@ -276,16 +307,16 @@ object Utils {
 
 
     private fun preProcessImageClassify(bitmap: Bitmap): Array<Array<Array<FloatArray>>> {
-        val width = bitmap.width
-        val height = bitmap.height
-        val input = Array(1) { Array(height) { Array(width) { FloatArray(3) } } }
+        val resizedBitmap = bitmap.scale(IMAGE_RESIZE, IMAGE_RESIZE, true)
+        val input = Array(1) { Array(IMAGE_RESIZE) { Array(IMAGE_RESIZE) { FloatArray(3) } } }
 
-        for (i in 0 until height) {
-            for (j in 0 until width) {
-                val pixel = bitmap[j, i]
-                input[0][i][j][0] = Color.red(pixel) / 255.0f
-                input[0][i][j][1] = Color.green(pixel) / 255.0f
-                input[0][i][j][2] = Color.blue(pixel) / 255.0f
+        for (i in 0 until IMAGE_RESIZE) {
+            for (j in 0 until IMAGE_RESIZE) {
+                val pixel = resizedBitmap[i, j]
+
+                input[0][i][j][0] = Color.red(pixel).toFloat()
+                input[0][i][j][1] = Color.green(pixel).toFloat()
+                input[0][i][j][2] = Color.blue(pixel).toFloat()
             }
         }
         return input
@@ -302,9 +333,12 @@ object Utils {
                 // Classificação executada em background thread
                 classifyBinary(context, bitmap)
 
+                // Redimensiona e comprime a imagem antes de salvar
+                val compressedImageBytes = resizeAndCompressImage(bitmap)
+
                 // Volta para a main thread para executar operações de UI e Firebase
                 withContext(Dispatchers.Main) {
-                    saveImageStores(bytes, user, context) { result ->
+                    saveImageStores(compressedImageBytes, user, context) { result ->
                         callback(result)
                     }
                 }
@@ -365,7 +399,7 @@ object Utils {
     }
 
     private fun sendEmailClassification(context: Context, rowImage: Img, image: ByteArray) {
-        if(rowImage.label.equals("s")) {
+        /*if(rowImage.label.equals("s")) {
             val cidadeEstado =
                 rowImage.latitude?.let { latitude ->
                     rowImage.longitude?.let { longitude ->
@@ -392,7 +426,7 @@ object Utils {
             }.addOnSuccessListener {
                 Log.i("Email", "Email successfully sent")
             }
-        }
+        }*/
     }
 
     fun showLoading(context: Context, layout: ViewGroup, hideViews: List<View>): ProgressBar {
