@@ -56,17 +56,17 @@ object Utils {
     private val db = Firebase.firestore
     private val storage = Firebase.storage
     lateinit var storageRef: StorageReference
-    private const val pathModel: String = "model/model_detection_triatominies_float32.tflite"
     private const val IMAGE_EXTENSION = ".jpg"
     private var imageByteArray: ByteArray? = null
-    var result: MutableList<String> = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var args: Bundle? = null
     private val functions = FirebaseFunctions.getInstance()
+    // Constantes/Variaveis Importante
+    private const val pathModel: String = "model/model_detection_triatominies_float32.tflite"
     private const val THRESHOLD: Float = 0.7f
-    private const val LOWER_THRESHOLD: Float = 0.4f
-    private const val UPPER_THRESHOLD: Float = 0.75f
     private const val IMAGE_RESIZE: Int = 224
+    var result: MutableList<String> = ArrayList()
+
     private const val IMAGE_SAVE_SIZE: Int = 800 // Tamanho para salvar (menor que o original)
     private const val IMAGE_QUALITY: Int = 75 // Qualidade de compressão (0-100)
     fun checkPermission(context: Context, permission: String): Boolean {
@@ -181,6 +181,28 @@ object Utils {
         imageByteArray = null
     }
 
+    // Carrega o modelo TFLite a partir dos assets e mapeia em memória para uso pelo TensorFlow Lite
+    @Throws(Exception::class)
+    private fun loadModelFile(context: Context): MappedByteBuffer {
+        // Abre o arquivo do modelo dentro da pasta "assets"
+        val fileDescriptor = context.assets.openFd(pathModel)
+
+        // Cria um FileInputStream a partir do descritor do arquivo
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+
+        // Obtém o canal do arquivo, necessário para mapear o arquivo em memória
+        val fileChannel = inputStream.channel
+
+        // Obtém o offset inicial do arquivo (posição onde o modelo começa)
+        val startOffset = fileDescriptor.startOffset
+
+        // Obtém o tamanho declarado do arquivo
+        val declaredLength = fileDescriptor.declaredLength
+
+        // Mapeia o arquivo em memória (somente leitura) e retorna o MappedByteBuffer
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+    }
+
     private fun saveImageFirestore(image: ByteArray, user: User?, imageName: String, context: Context, callback: (Boolean) -> Unit) {
         //Salvando imagem no Firestore(DB)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -249,38 +271,38 @@ object Utils {
 
     }
 
-    @Throws(Exception::class)
-    private fun loadModelFile(context: Context): MappedByteBuffer {
-        val fileDescriptor = context.assets.openFd(pathModel)
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-    }
-
-
+    // Classifica uma imagem bitmap em múltiplas classes usando o modelo TFLite
     private fun classifyMultiClass(context: Context, bitmap: Bitmap) {
+        // Carrega o modelo previamente mapeado em memória
         val model = loadModelFile(context)
+        // Pré-processa a imagem para transformar no formato aceito pelo modelo (normalização, redimensionamento etc.)
         val input = preProcessImageClassify(bitmap)
+        // Cria o interpretador do TensorFlow Lite com o modelo carregado
         val interpreter = Interpreter(model)
+        // Cria um array de saída para armazenar as previsões (1 linha, 3 classes)
         val output = Array(1) { FloatArray(3) }
-
+        // Executa a inferência do modelo com o input e preenche o array de saída
         interpreter.run(input, output)
+        // Obtém o array de previsões da primeira (e única) amostra
         val prediction = output[0]
+        // Encontra o valor máximo da previsão, que representa a classe mais provável
         val maxValue = prediction.maxOrNull() ?: throw IllegalArgumentException("Array is empty")
-
+        // Se o valor máximo for menor que o limiar definido, considera que não há previsão confiável
         if(maxValue < THRESHOLD) {
-            result.add("u")
-            result.add("1.0")
+            result.add("u")      // 'u' indicando "Não identificado" ou "unknown"
+            result.add("1.0")    // valor padrão
             return
         }
-
+        // Determina a classe correspondente ao valor máximo
         when (prediction.toList().indexOf(maxValue)) {
-            0 -> result.add("n")
-            1 -> result.add("s")
-            else -> {result.add("u"); result.add("1.0")}
+            0 -> result.add("n")  // Inseto não Transmissor
+            1 -> result.add("s")  // Inseto Transmissor
+            else -> {             // caso caia fora das classes conhecidas
+                result.add("u")
+                result.add("1.0")
+            }
         }
+        // Adiciona o valor da confiança (probabilidade) ao resultado
         result.add(maxValue.toString())
     }
 
@@ -307,18 +329,24 @@ object Utils {
 
 
     private fun preProcessImageClassify(bitmap: Bitmap): Array<Array<Array<FloatArray>>> {
+        // Redimensiona a imagem para o tamanho esperado pelo modelo (IMAGE_RESIZE x IMAGE_RESIZE)
         val resizedBitmap = bitmap.scale(IMAGE_RESIZE, IMAGE_RESIZE, true)
+        // Cria o array de entrada para o modelo:
+        // Estrutura: [1 amostra][altura][largura][3 canais RGB]
         val input = Array(1) { Array(IMAGE_RESIZE) { Array(IMAGE_RESIZE) { FloatArray(3) } } }
-
+        // Percorre cada pixel da imagem redimensionada
         for (i in 0 until IMAGE_RESIZE) {
             for (j in 0 until IMAGE_RESIZE) {
+                // Obtém o valor do pixel na posição (i, j)
                 val pixel = resizedBitmap[i, j]
-
-                input[0][i][j][0] = Color.red(pixel).toFloat()
-                input[0][i][j][1] = Color.green(pixel).toFloat()
-                input[0][i][j][2] = Color.blue(pixel).toFloat()
+                // Extrai os valores de vermelho, verde e azul do pixel
+                // e armazena no array de entrada do modelo
+                input[0][i][j][0] = Color.red(pixel).toFloat()    // canal vermelho
+                input[0][i][j][1] = Color.green(pixel).toFloat()  // canal verde
+                input[0][i][j][2] = Color.blue(pixel).toFloat()   // canal azul
             }
         }
+        // Retorna o array tridimensional pronto para passar ao interpretador TFLite
         return input
     }
 
@@ -326,12 +354,14 @@ object Utils {
         // Executa a classificação em uma thread de background
         GlobalScope.launch(Dispatchers.IO) {
             try {
+                // Limpando resultados antigos
                 result.clear()
 
+                // Convertendo a imagem em bytes para Bitmap
                 val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
                 // Classificação executada em background thread
-                classifyBinary(context, bitmap)
+                classifyMultiClass(context, bitmap)
 
                 // Redimensiona e comprime a imagem antes de salvar
                 val compressedImageBytes = resizeAndCompressImage(bitmap)
