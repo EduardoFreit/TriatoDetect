@@ -16,6 +16,7 @@ import com.br.triatodetect.R
 import com.br.triatodetect.databinding.FragmentMapsBinding
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.User
+import com.br.triatodetect.service.FirebaseService
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -36,6 +37,7 @@ class MapsFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var user: User? = null
     private lateinit var sessionManager: SessionManager
+    private val firebaseService = FirebaseService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +73,7 @@ class MapsFragment : Fragment() {
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel)
                 mMap.moveCamera(cameraUpdate)
 
-                Utils.listImagesUser(user!!.email, "Images") { listImages: Array<Img> ->
+                firebaseService.listImagesUser(user!!.email, "Images") { listImages: Array<Img> ->
                     for (image in listImages) {
                         val localization = LatLng(image.latitude!!, image.longitude!!)
 

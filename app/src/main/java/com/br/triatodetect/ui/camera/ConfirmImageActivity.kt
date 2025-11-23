@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.br.triatodetect.databinding.ActivityConfirmImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
@@ -14,6 +15,9 @@ import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.br.triatodetect.R
+import com.br.triatodetect.service.ClassifyService
+import com.br.triatodetect.utils.ImageUtils
+import kotlinx.coroutines.launch
 
 class ConfirmImageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityConfirmImageBinding
@@ -21,6 +25,7 @@ class ConfirmImageActivity : AppCompatActivity() {
     private var user: User? = null
     private var image: ByteArray? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val classifyService = ClassifyService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +35,7 @@ class ConfirmImageActivity : AppCompatActivity() {
         sessionManager = SessionManager.getInstance(applicationContext)
         this.user = sessionManager.getUserData()
 
-        image = Utils.getImageByteArray()
+        image = ImageUtils.getImageByteArray()
         image?.let {
             val bitmap: Bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
             binding.imageView.setImageBitmap(bitmap)
@@ -43,7 +48,7 @@ class ConfirmImageActivity : AppCompatActivity() {
         binding.floatButtonAccept.setOnClickListener { processImage() }
     }
 
-    private fun processImage() {
+    fun processImage() {
         image?.let {
             val progressBar = Utils.showLoading(
                 this,
@@ -53,20 +58,22 @@ class ConfirmImageActivity : AppCompatActivity() {
                     binding.floatButtonCancel
                 )
             )
-            Utils.initClassify(this, it, user) { success: Boolean ->
-                Utils.hideLoading(progressBar, binding.layout, listOf())
-                if(!success) {
-                    Toast.makeText(this, getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
+            lifecycleScope.launch {
+                classifyService.initClassify(this@ConfirmImageActivity, it, user) { success: Boolean ->
+                    Utils.hideLoading(progressBar, binding.layout, listOf())
+                    if(!success) {
+                        Toast.makeText(this@ConfirmImageActivity, getString(R.string.erro_proc_image), Toast.LENGTH_SHORT).show();
+                    }
+                    val intent = Intent(this@ConfirmImageActivity, HomeActivity::class.java)
+                    startActivity(intent)
+                    finish()
                 }
-                val intent = Intent(this@ConfirmImageActivity, HomeActivity::class.java)
-                startActivity(intent)
-                finish()
             }
         }
     }
 
     private fun cancelImage() {
-        Utils.resetImageByteArray()
+        ImageUtils.resetImageByteArray()
         val intent = Intent(this, InstructionCameraActivity::class.java)
         startActivity(intent)
         finish()

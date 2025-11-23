@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import com.br.triatodetect.databinding.ActivityCameraBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.HomeActivity
+import com.br.triatodetect.utils.ImageUtils
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import java.util.concurrent.ExecutorService
@@ -90,6 +91,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val intent = Intent(this, HomeActivity::class.java)
         startActivity(intent)
@@ -106,7 +108,7 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     imageProxy.image?.let { image: Image ->
-                        Utils.setImageByteArray(image, imageProxy.imageInfo.rotationDegrees);
+                        ImageUtils.setImageByteArray(image, imageProxy.imageInfo.rotationDegrees);
                         val intent = Intent(this@CameraActivity, ConfirmImageActivity::class.java)
                         startActivity(intent)
                     }

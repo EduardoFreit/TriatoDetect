@@ -52,6 +52,7 @@ class HomeActivity : BaseActivity() {
         binding.floatButtonCamera.setOnClickListener { this.openCamera() }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if(Objects.nonNull(sessionManager.getUserData())) {
             moveTaskToBack(true)

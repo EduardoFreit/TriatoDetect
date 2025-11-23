@@ -7,13 +7,14 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import com.br.triatodetect.R
 import com.br.triatodetect.databinding.ActivityInstructionCameraBinding
+import com.br.triatodetect.utils.ImageUtils
 import com.br.triatodetect.utils.Utils
 
 class InstructionCameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityInstructionCameraBinding
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            Utils.setUriByteArray(it, applicationContext)
+            ImageUtils.setUriByteArray(it, applicationContext)
             val intent = Intent(this@InstructionCameraActivity, ConfirmImageActivity::class.java)
             startActivity(intent)
         }

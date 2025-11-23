@@ -1,4 +1,4 @@
-package com.br.triatodetect.ui.home.listImage
+package com.br.triatodetect.ui.component
 
 import android.app.Dialog
 import android.graphics.Bitmap
@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
-import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
 import com.br.triatodetect.ui.home.map.MapsFragment
 import com.br.triatodetect.utils.Utils
@@ -26,7 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class ModalDetailsImage(private val image: Img?, private val user: User?, private val bitmap: Bitmap?) : BottomSheetDialogFragment() {
+class ModalDetailsImage(private val image: Img?, private val bitmap: Bitmap?) : BottomSheetDialogFragment() {
 
     private lateinit var imageDate: TextView
     private lateinit var imageClassify: TextView

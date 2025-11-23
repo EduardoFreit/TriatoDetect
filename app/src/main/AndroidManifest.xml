@@ -26,6 +26,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.TriatoDetect"
+        android:forceDarkAllowed="false"
+        tools:ignore="UnusedAttribute"
         tools:targetApi="31">
 
         <meta-data

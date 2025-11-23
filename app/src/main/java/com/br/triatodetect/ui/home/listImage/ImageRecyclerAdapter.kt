@@ -1,11 +1,13 @@
 package com.br.triatodetect.ui.home.listImage
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
 
+@SuppressLint("NotifyDataSetChanged")
 class ImageRecyclerAdapter(private val images: MutableList<Img> = mutableListOf()) :
     RecyclerView.Adapter<ImageHolder>() {
 

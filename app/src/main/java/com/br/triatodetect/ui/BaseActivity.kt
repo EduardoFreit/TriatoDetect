@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.br.triatodetect.R
 import com.br.triatodetect.ui.main.MainActivity
 import com.br.triatodetect.utils.SessionManager
@@ -22,6 +23,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Força modo claro (desabilita modo escuro)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         sessionManager = SessionManager.getInstance(applicationContext)
         auth = FirebaseAuth.getInstance()
     }

@@ -3,15 +3,17 @@ package com.br.triatodetect.utils
 import android.content.Context
 import android.content.SharedPreferences
 import com.br.triatodetect.models.User
+import androidx.core.content.edit
 
+// Gerenciador de sessão para armazenar e recuperar dados do usuário
 class SessionManager private constructor(private val context: Context) {
 
     fun saveUserData(user: User) {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString(USER_NAME, user.name)
-        editor.putString(USER_EMAIL, user.email)
-        editor.apply()
+        sharedPreferences.edit {
+            putString(USER_NAME, user.name)
+            putString(USER_EMAIL, user.email)
+        }
     }
 
     fun getUserData(): User? {
@@ -26,10 +28,10 @@ class SessionManager private constructor(private val context: Context) {
 
     fun clearAllData() {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-
-        editor.clear()
-        editor.apply()
+        sharedPreferences.edit {
+            clear()
+            apply()
+        }
     }
 
     companion object {

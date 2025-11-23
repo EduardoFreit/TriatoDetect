@@ -5,12 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.br.triatodetect.models.User
 
 class ListImageViewModelFactory(private val user: User) : ViewModelProvider.Factory {
-
+    
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ListImageViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return ListImageViewModel(user) as T
+        return when {
+            modelClass.isAssignableFrom(ListImageViewModel::class.java) -> 
+                ListImageViewModel(user) as T
+            else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

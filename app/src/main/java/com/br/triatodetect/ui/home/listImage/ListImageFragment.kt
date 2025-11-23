@@ -31,9 +31,9 @@ class ListImageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listImageViewModelFactory = ListImageViewModelFactory(user!!)
-        listImageViewModel =
-            ViewModelProvider(this, listImageViewModelFactory)[ListImageViewModel::class.java]
+        // Usa ListImageViewModelFactory para criar o ViewModel com parâmetros personalizados
+        val viewModelFactory = ListImageViewModelFactory(user!!)
+        listImageViewModel = ViewModelProvider(this, viewModelFactory)[ListImageViewModel::class.java]
 
         // Inicializa o adapter
         adapter = ImageRecyclerAdapter()
