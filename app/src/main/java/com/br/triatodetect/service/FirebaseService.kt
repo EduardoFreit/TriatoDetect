@@ -48,6 +48,23 @@ class FirebaseService {
             }
     }
 
+    fun listImages(collection: String, callback: (Array<Img>) -> Unit) {
+        val result = mutableListOf<Img>()
+        db.collection(collection)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val image = document.toObject(Img::class.java)
+                    result.add(image)
+                }
+                callback(result.toTypedArray())
+            }
+            .addOnFailureListener { exception ->
+                Log.e("List", "Error getting documents.", exception)
+                callback(emptyArray())
+            }
+    }
+
     fun saveImageStores(image: ByteArray, user: User?, context: Context, classifyResult: MutableList<String>, callback: (Boolean) -> Unit) {
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${Constants.IMAGE_EXTENSION}"

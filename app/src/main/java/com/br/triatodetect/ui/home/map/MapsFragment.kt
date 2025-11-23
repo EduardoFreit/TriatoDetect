@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.util.Locale
 
 class MapsFragment : Fragment() {
 
@@ -73,7 +74,7 @@ class MapsFragment : Fragment() {
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel)
                 mMap.moveCamera(cameraUpdate)
 
-                firebaseService.listImagesUser(user!!.email, "Images") { listImages: Array<Img> ->
+                firebaseService.listImages("Images") { listImages: Array<Img> ->
                     for (image in listImages) {
                         val localization = LatLng(image.latitude!!, image.longitude!!)
 
@@ -89,7 +90,7 @@ class MapsFragment : Fragment() {
                             else -> this.colorToHex(binding.root.context, R.color.u)
                         }
 
-                        val imageDate: String? = SimpleDateFormat("dd/MM/yyyy - HH:mm").format(image.date)
+                        val imageDate: String? = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault()).format(image.date)
 
                         mMap.addMarker(MarkerOptions().position(localization).title(textClassify).snippet(imageDate))?.setIcon(
                             getMarkerIcon(colorClassify))
