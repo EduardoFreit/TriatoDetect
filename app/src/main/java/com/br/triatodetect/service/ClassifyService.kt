@@ -72,7 +72,7 @@ class ClassifyService {
         // Cria o interpretador do TensorFlow Lite com o modelo carregado
         val interpreter = Interpreter(model)
         // Cria um array de saída para armazenar as previsões (1 linha, 3 classes)
-        val output = Array(1) { FloatArray(1) }
+        val output = Array(1) { FloatArray(3) }
         // Executa a inferência do modelo com o input e preenche o array de saída
         interpreter.run(input, output)
         // Obtém o array de previsões da primeira (e única) amostra
@@ -108,7 +108,7 @@ class ClassifyService {
                 val bitmap: Bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
 
                 // Classificação executada em background thread
-                classifyMultiClass(context, bitmap)
+                classifyBinary(context, bitmap)
 
                 // Redimensiona e comprime a imagem antes de salvar
                 val compressedImageBytes = ImageUtils.resizeAndCompressImage(bitmap)
