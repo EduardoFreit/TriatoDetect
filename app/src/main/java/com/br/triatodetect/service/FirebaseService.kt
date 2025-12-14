@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.StatusImage
 import com.br.triatodetect.models.User
+import com.br.triatodetect.service.interfaces.IBackendService
 import com.br.triatodetect.utils.Constants
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -22,14 +23,14 @@ import com.google.firebase.storage.ktx.storage
 
 
 // Serviço para interagir com Firebase (Firestore e Storage)
-class FirebaseService {
+class FirebaseService: IBackendService {
 
     private val db = Firebase.firestore
     private val storage = Firebase.storage
     lateinit var storageRef: StorageReference
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    fun listImagesUser(email: String?, collection: String, callback: (Array<Img>) -> Unit) {
+    override fun listImagesUser(email: String?, collection: String, callback: (Array<Img>) -> Unit) {
         val result = mutableListOf<Img>()
         db.collection(collection)
             .whereEqualTo("email", email)
@@ -48,7 +49,7 @@ class FirebaseService {
             }
     }
 
-    fun listImages(collection: String, callback: (Array<Img>) -> Unit) {
+    override fun listImages(collection: String, callback: (Array<Img>) -> Unit) {
         val result = mutableListOf<Img>()
         db.collection(collection)
             .get()
@@ -65,7 +66,7 @@ class FirebaseService {
             }
     }
 
-    fun saveImageStores(image: ByteArray, user: User?, context: Context, classifyResult: MutableList<String>, callback: (Boolean) -> Unit) {
+    override fun saveImageStores(image: ByteArray, user: User?, context: Context, classifyResult: MutableList<String>, callback: (Boolean) -> Unit) {
         val currentTime: String = System.currentTimeMillis().toString()
         val imageName = "${currentTime}${Constants.IMAGE_EXTENSION}"
 
@@ -94,7 +95,7 @@ class FirebaseService {
 
     }
 
-    fun retrieveImage(user: User, image: Img, callback: (ByteArray?) -> Unit) {
+    override fun retrieveImage(user: User, image: Img, callback: (ByteArray?) -> Unit) {
         user.email?.let { email: String ->
             storageRef = storage.reference
             val insectImagesRef: StorageReference = storageRef
@@ -165,7 +166,7 @@ class FirebaseService {
             }
     }
 
-    private fun sendEmailClassification(context: Context, rowImage: Img, image: ByteArray) {
+    override fun sendEmailClassification(context: Context, rowImage: Img, image: ByteArray) {
         /*if(rowImage.label.equals("s")) {
             val cidadeEstado =
                 rowImage.latitude?.let { latitude ->

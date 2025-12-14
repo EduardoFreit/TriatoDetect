@@ -7,6 +7,7 @@ import android.graphics.Color
 import androidx.core.graphics.get
 import androidx.core.graphics.scale
 import com.br.triatodetect.models.User
+import com.br.triatodetect.service.interfaces.IClassifyService
 import com.br.triatodetect.utils.Constants
 import com.br.triatodetect.utils.ImageUtils
 import com.br.triatodetect.utils.MLoader
@@ -16,7 +17,7 @@ import org.tensorflow.lite.Interpreter
 
 
 // Serviço para classificação de imagens usando TensorFlow Lite
-class ClassifyService {
+class ClassifyService: IClassifyService {
 
     private val firebaseService = FirebaseService()
     private var classifyResult: MutableList<String> = ArrayList()
@@ -98,7 +99,7 @@ class ClassifyService {
         classifyResult.add(maxValue.toString())
     }
 
-    suspend fun initClassify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
+    override suspend fun initClassify(context: Context, bytes: ByteArray, user: User?, callback: (Boolean) -> Unit) {
         // Executa a classificação em uma thread de background
             try {
                 // Limpando resultados antigos
