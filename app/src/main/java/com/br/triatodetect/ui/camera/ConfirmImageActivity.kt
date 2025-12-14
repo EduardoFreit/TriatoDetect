@@ -15,7 +15,8 @@ import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.br.triatodetect.R
-import com.br.triatodetect.service.ClassifyService
+import org.koin.android.ext.android.inject
+import com.br.triatodetect.service.interfaces.IClassifyService
 import com.br.triatodetect.utils.ImageUtils
 import kotlinx.coroutines.launch
 
@@ -25,7 +26,7 @@ class ConfirmImageActivity : AppCompatActivity() {
     private var user: User? = null
     private var image: ByteArray? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val classifyService = ClassifyService()
+    private val classifyService: IClassifyService by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

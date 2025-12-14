@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.User
-import com.br.triatodetect.service.FirebaseService
+import com.br.triatodetect.service.interfaces.IBackendService
 import com.br.triatodetect.ui.component.ModalDetailsImage
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 
-class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+class ImageHolder(itemView: View, val backendService: IBackendService) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     private val imageDate: TextView = itemView.findViewById(R.id.image_date)
     private val imageLocal: TextView = itemView.findViewById(R.id.image_local)
     private val imageClassify: TextView = itemView.findViewById(R.id.image_classify)
@@ -24,7 +24,6 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
     private var user: User? = null
     private var imageObject: Img? = null
     private var bitmap: Bitmap? = null
-    private val firebaseService = FirebaseService()
 
     companion object {
         // Cache simples para imagens já carregadas
@@ -73,7 +72,7 @@ class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnCl
             // Define uma cor de fundo cinza enquanto carrega
             imageImage.setBackgroundColor(0xFFE0E0E0.toInt())
             
-            firebaseService.retrieveImage(user!!, image) { bytes: ByteArray? ->
+            backendService.retrieveImage(user!!, image) { bytes: ByteArray? ->
                 // Verifica se ainda é a mesma imagem (evita race conditions)
                 if (imageObject?.imageName == image.imageName && bytes != null) {
                     bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)

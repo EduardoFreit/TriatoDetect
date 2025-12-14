@@ -6,15 +6,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.br.triatodetect.R
 import com.br.triatodetect.models.Img
+import com.br.triatodetect.service.interfaces.IBackendService
 
 @SuppressLint("NotifyDataSetChanged")
-class ImageRecyclerAdapter(private val images: MutableList<Img> = mutableListOf()) :
-    RecyclerView.Adapter<ImageHolder>() {
+class ImageRecyclerAdapter(
+    private val images: MutableList<Img> = mutableListOf(),
+    private val backendService: IBackendService
+) : RecyclerView.Adapter<ImageHolder>() {
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
         val inflatedView = LayoutInflater.from(parent.context)
             .inflate(R.layout.image_listitem, parent, false)
-        return ImageHolder(inflatedView)
+        return ImageHolder(inflatedView, backendService)
     }
 
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {

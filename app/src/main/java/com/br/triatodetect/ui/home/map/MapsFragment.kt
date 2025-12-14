@@ -16,7 +16,6 @@ import com.br.triatodetect.R
 import com.br.triatodetect.databinding.FragmentMapsBinding
 import com.br.triatodetect.models.Img
 import com.br.triatodetect.models.User
-import com.br.triatodetect.service.FirebaseService
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.utils.Utils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,6 +29,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import java.util.Locale
+import com.br.triatodetect.service.interfaces.IBackendService
+import org.koin.android.ext.android.inject
 
 class MapsFragment : Fragment() {
 
@@ -38,7 +39,7 @@ class MapsFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var user: User? = null
     private lateinit var sessionManager: SessionManager
-    private val firebaseService = FirebaseService()
+    private val backendService: IBackendService by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +75,7 @@ class MapsFragment : Fragment() {
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(userLocation, zoomLevel)
                 mMap.moveCamera(cameraUpdate)
 
-                firebaseService.listImages("Images") { listImages: Array<Img> ->
+                backendService.listImages("Images") { listImages: Array<Img> ->
                     for (image in listImages) {
                         val localization = LatLng(image.latitude!!, image.longitude!!)
 

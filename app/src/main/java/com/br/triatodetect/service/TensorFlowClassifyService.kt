@@ -7,6 +7,7 @@ import android.graphics.Color
 import androidx.core.graphics.get
 import androidx.core.graphics.scale
 import com.br.triatodetect.models.User
+import com.br.triatodetect.service.interfaces.IBackendService
 import com.br.triatodetect.service.interfaces.IClassifyService
 import com.br.triatodetect.utils.Constants
 import com.br.triatodetect.utils.ImageUtils
@@ -17,9 +18,7 @@ import org.tensorflow.lite.Interpreter
 
 
 // Serviço para classificação de imagens usando TensorFlow Lite
-class ClassifyService: IClassifyService {
-
-    private val firebaseService = FirebaseService()
+class TensorFlowClassifyService(private val backendService: IBackendService): IClassifyService {
     private var classifyResult: MutableList<String> = ArrayList()
 
     private fun preProcessImageClassify(bitmap: Bitmap): Array<Array<Array<FloatArray>>> {
@@ -115,7 +114,7 @@ class ClassifyService: IClassifyService {
                 val compressedImageBytes = ImageUtils.resizeAndCompressImage(bitmap)
 
                 // Volta para a main thread para executar operações de UI e Firebase
-                firebaseService.saveImageStores(compressedImageBytes, user, context, classifyResult) { saveImageStoresResult ->
+                this.backendService.saveImageStores(compressedImageBytes, user, context, classifyResult) { saveImageStoresResult ->
                     callback(saveImageStoresResult)
                 }
 

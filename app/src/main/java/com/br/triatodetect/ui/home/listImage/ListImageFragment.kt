@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.br.triatodetect.databinding.FragmentListImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
+import com.br.triatodetect.service.interfaces.IBackendService
+import org.koin.android.ext.android.inject
 
 class ListImageFragment : Fragment() {
     private var _binding: FragmentListImageBinding? = null
@@ -18,6 +20,7 @@ class ListImageFragment : Fragment() {
     private var user: User? = null
     private lateinit var adapter: ImageRecyclerAdapter
     private lateinit var listImageViewModel: ListImageViewModel
+    private val backendService: IBackendService by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,11 +35,12 @@ class ListImageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Usa ListImageViewModelFactory para criar o ViewModel com parâmetros personalizados
-        val viewModelFactory = ListImageViewModelFactory(user!!)
-        listImageViewModel = ViewModelProvider(this, viewModelFactory)[ListImageViewModel::class.java]
+        val viewModelFactory = ListImageViewModelFactory(user!!, backendService)
+        listImageViewModel =
+            ViewModelProvider(this, viewModelFactory)[ListImageViewModel::class.java]
 
         // Inicializa o adapter
-        adapter = ImageRecyclerAdapter()
+        adapter = ImageRecyclerAdapter(backendService = backendService)
         binding.listView.layoutManager = LinearLayoutManager(binding.root.context)
         binding.listView.adapter = adapter
 
