@@ -40,11 +40,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.loginGoogleButton.setOnClickListener {
             authService = getKoin().get(qualifier = named("google"))
-            signInGoogle()
+            signIn()
         }
     }
 
-    private fun signInGoogle() {
+    private fun signIn() {
         val intent = authService.getSignInIntent()
         launcher.launch(intent!!)
     }
