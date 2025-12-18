@@ -5,13 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.br.triatodetect.databinding.FragmentListImageBinding
 import com.br.triatodetect.models.User
 import com.br.triatodetect.utils.SessionManager
 import com.br.triatodetect.service.interfaces.IBackendService
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.core.parameter.parametersOf
 
 class ListImageFragment : Fragment() {
     private var _binding: FragmentListImageBinding? = null
@@ -29,16 +30,12 @@ class ListImageFragment : Fragment() {
         _binding = FragmentListImageBinding.inflate(inflater, container, false)
         sessionManager = SessionManager.getInstance(binding.root.context)
         user = sessionManager.getUserData()
+        listImageViewModel = getViewModel(parameters = { parametersOf(user) })
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Usa ListImageViewModelFactory para criar o ViewModel com parâmetros personalizados
-        val viewModelFactory = ListImageViewModelFactory(user!!, backendService)
-        listImageViewModel =
-            ViewModelProvider(this, viewModelFactory)[ListImageViewModel::class.java]
-
         // Inicializa o adapter
         adapter = ImageRecyclerAdapter(backendService = backendService)
         binding.listView.layoutManager = LinearLayoutManager(binding.root.context)
@@ -60,9 +57,7 @@ class ListImageFragment : Fragment() {
         super.onResume()
         // Recarrega a lista quando o fragmento volta a ser visível
         // Isso garante que novas imagens sejam mostradas quando o usuário retorna da captura
-        if (::listImageViewModel.isInitialized) {
-            listImageViewModel.refreshListImages()
-        }
+        listImageViewModel.refreshListImages()
     }
 
     override fun onDestroyView() {
