@@ -1,6 +1,5 @@
 package com.br.triatodetect.di
 
-import android.content.Context
 import com.br.triatodetect.models.User
 import com.br.triatodetect.service.interfaces.IAuthService
 import com.br.triatodetect.service.interfaces.IBackendService
