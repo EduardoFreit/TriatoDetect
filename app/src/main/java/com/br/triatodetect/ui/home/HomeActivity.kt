@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -52,11 +53,11 @@ class HomeActivity : BaseActivity() {
         binding.floatButtonCamera.setOnClickListener { this.openCamera() }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
         if(Objects.nonNull(sessionManager.getUserData())) {
             moveTaskToBack(true)
         }
+        return super.getOnBackInvokedDispatcher()
     }
 
     override fun onRequestPermissionsResult(

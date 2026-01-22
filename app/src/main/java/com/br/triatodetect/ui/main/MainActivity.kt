@@ -5,76 +5,78 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import com.br.triatodetect.R
-import com.br.triatodetect.databinding.ActivityMainBinding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.br.triatodetect.ui.home.HomeActivity
-import com.br.triatodetect.utils.SessionManager
-import com.br.triatodetect.service.interfaces.IAuthService
-import org.koin.android.ext.android.getKoin
-import org.koin.core.qualifier.named
-import java.util.Objects
+import com.br.triatodetect.ui.theme.TriatoDetectTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var authService: IAuthService
-    private lateinit var sessionManager: SessionManager
+    private val viewModel: MainViewModel by viewModel()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Força modo claro (desabilita modo escuro)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        sessionManager = SessionManager.getInstance(applicationContext)
-
-        if (Objects.nonNull(sessionManager.getUserData())) {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            return
-        }
-
-        supportActionBar?.hide()
-        setContentView(binding.root)
-
-        binding.loginGoogleButton.setOnClickListener {
-            authService = getKoin().get(qualifier = named("google"))
-            signIn()
-        }
-    }
-
-    private fun signIn() {
-        val intent = authService.getSignInIntent()
-        launcher.launch(intent!!)
-    }
-
-    private val launcher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            authService.handleActivityResult(
-                result.resultCode,
-                result.data,
-                onSuccess = { user ->
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                },
-                onError = { err ->
-                    Toast.makeText(
-                        this,
-                        err.message ?: getString(R.string.falha_no_login),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+    private val launcher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            viewModel.handleActivityResult(
+                it.resultCode,
+                it.data
             )
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    override fun onResume() {
-        if (Objects.nonNull(sessionManager.getUserData())) {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        supportActionBar?.hide()
+
+        observeEvents()
+
+        setContent {
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            TriatoDetectTheme {
+                MainScreen(
+                    isLoading = uiState.isLoading,
+                    onLoginClick = {
+                        viewModel.onLoginClicked()
+                    }
+                )
+            }
         }
-        super.onResume()
     }
 
+    private fun observeEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.event.collect { event ->
+                    when (event) {
+
+                        is MainEvent.OpenLogin ->
+                            launcher.launch(event.intent)
+
+                        MainEvent.NavigateHome ->
+                            startActivity(
+                                Intent(
+                                    this@MainActivity,
+                                    HomeActivity::class.java
+                                )
+                            )
+
+                        is MainEvent.ShowError ->
+                            Toast.makeText(
+                                this@MainActivity,
+                                event.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                    }
+                }
+            }
+        }
+    }
 }

@@ -6,7 +6,7 @@ import com.br.triatodetect.models.User
 import androidx.core.content.edit
 
 // Gerenciador de sessão para armazenar e recuperar dados do usuário
-class SessionManager private constructor(private val context: Context) {
+class SessionManager (private val context: Context) {
 
     fun saveUserData(user: User) {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)

@@ -2,19 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="${googleMapsApiKey}" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.camera.any" />
 
@@ -37,26 +27,22 @@
 
         <activity
             android:name=".ui.camera.ConfirmImageActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false"/>
         <activity
             android:name=".ui.camera.InstructionCameraActivity"
             android:exported="false"
-            android:parentActivityName=".ui.home.HomeActivity"
-            android:screenOrientation="portrait"></activity>
+            android:parentActivityName=".ui.home.HomeActivity">
+        </activity>
         <activity
             android:name=".ui.camera.CameraActivity"
             android:exported="false"
-            android:parentActivityName=".ui.home.HomeActivity"
-            android:screenOrientation="portrait" />
+            android:parentActivityName=".ui.home.HomeActivity"/>
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false"/>
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
